@@ -62,6 +62,9 @@ cat > /etc/nginx/conf.d/rate-limit.conf << EOF
 # API 速率限制配置
 # 防止 API 滥用和 DDoS 攻击
 
+# 隐藏 Nginx 版本信息
+server_tokens off;
+
 # 定义限流区域
 limit_req_zone \$binary_remote_addr zone=api_limit:10m rate=${RATE_LIMIT};
 limit_req_zone \$binary_remote_addr zone=api_strict:10m rate=5r/s;
@@ -136,9 +139,11 @@ cat > /etc/nginx/snippets/api-protection.conf << EOF
 limit_req zone=api_limit burst=${BURST} nodelay;
 limit_conn conn_limit ${CONN_LIMIT};
 
-# 隐藏服务器信息
-more_clear_headers 'Server';
-more_clear_headers 'X-Powered-By';
+# 隐藏服务器信息（需在 http 块中设置 server_tokens off）
+# 如果安装了 nginx-extras 或 headers-more 模块，可以取消下面两行注释：
+# more_clear_headers 'Server';
+# more_clear_headers 'X-Powered-By';
+proxy_hide_header X-Powered-By;
 
 # 安全头
 add_header X-Content-Type-Options "nosniff" always;
