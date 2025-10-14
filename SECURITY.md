@@ -13,7 +13,9 @@
     ↓
 HTTPS (443) - SSL 终止
     ↓
-Nginx 反向代理 (宿主机)
+Nginx 反向代理 + 速率限制 + WAF
+    ↓
+Fail2ban 监控 + 自动封禁
     ↓
 localhost:8080 - 防火墙保护
     ↓
@@ -26,9 +28,39 @@ Go 应用服务
 
 1. **SSL/TLS 加密** - 所有外部通信使用 HTTPS
 2. **Nginx 反向代理** - 隐藏内部服务，提供额外保护
-3. **防火墙规则** - 限制 8080 端口只能本地访问
-4. **Docker 隔离** - 容器化运行，限制资源访问
-5. **只读文件系统** - 容器文件系统只读（可选）
+3. **速率限制** - 防止 API 滥用和 DDoS 攻击 ⭐ 新增
+4. **Fail2ban** - 自动检测和封禁恶意 IP ⭐ 新增
+5. **防火墙规则** - 限制 8080 端口只能本地访问
+6. **Docker 隔离** - 容器化运行，限制资源访问
+7. **实时监控** - 监控异常请求和攻击 ⭐ 新增
+
+---
+
+## 🚀 快速防护部署
+
+### 一键配置所有防护措施
+
+```bash
+# 1. 配置防火墙（关闭 8080 对外访问）
+sudo ./block-8080.sh
+
+# 2. 配置 API 速率限制和防护
+sudo ./setup-api-protection.sh
+
+# 3. 监控 API 安全状态
+sudo ./monitor-api.sh
+```
+
+### 管理工具
+
+| 脚本 | 用途 |
+|------|------|
+| `setup-api-protection.sh` | 配置速率限制、Fail2ban 等防护 ⭐ |
+| `monitor-api.sh` | 监控 API 访问和异常行为 ⭐ |
+| `block-ip.sh` | 快速封禁恶意 IP ⭐ |
+| `unblock-ip.sh` | 解封 IP 地址 ⭐ |
+| `block-8080.sh` | 配置端口防火墙 |
+| `cleanup-8080-rules.sh` | 清理防火墙规则 |
 
 ---
 
@@ -152,28 +184,48 @@ ports:
 
 ## 🌐 Nginx 安全配置
 
-### 限流保护
+### 使用自动化脚本配置（推荐）⭐
 
-在 Nginx 配置中添加限流：
+```bash
+# 运行防护配置脚本
+sudo ./setup-api-protection.sh
+```
+
+脚本会自动配置：
+- ✅ 速率限制（防止 API 滥用）
+- ✅ 连接数限制（防止 DDoS）
+- ✅ 请求体大小限制（防止大文件攻击）
+- ✅ 安全响应头
+- ✅ Fail2ban 自动封禁
+- ✅ IP 黑名单功能
+
+### 手动配置限流保护
+
+如果需要手动配置，在 Nginx 配置中添加：
 
 ```nginx
 http {
     # 定义限流区域
     limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
-
+    limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
+    
     server {
         location /api/ {
-            # 应用限流（每秒 10 个请求，突发 20 个）
+            # 应用速率限制（每秒 10 个请求，突发 20 个）
             limit_req zone=api_limit burst=20 nodelay;
-
+            
+            # 限制单 IP 并发连接数
+            limit_conn conn_limit 10;
+            
+            # 引入防护配置
+            include snippets/api-protection.conf;
+            
             proxy_pass http://localhost:8080/api/;
             # ... 其他配置
         }
     }
 }
-```
-
-### 隐藏版本信息
+```### 隐藏版本信息
 
 ```nginx
 http {
@@ -319,16 +371,36 @@ CMD ["./checksum-api"]
 
 ## 📊 安全监控
 
-### 日志监控
+### 使用监控脚本（推荐）⭐
+
+```bash
+# 运行完整的安全监控
+sudo ./monitor-api.sh
+```
+
+脚本会显示：
+- ✅ 访问统计（IP、状态码、路径）
+- ✅ 错误日志分析
+- ✅ Fail2ban 状态
+- ✅ 被封禁的 IP 列表
+- ✅ Docker 容器状态和资源使用
+
+### 手动日志监控
 
 **Nginx 访问日志**：
 
 ```bash
-# 实时监控访问
-sudo tail -f /var/log/nginx/access.log
+# 实时监控 API 访问
+sudo tail -f /var/log/nginx/api_access.log
 
 # 查找异常请求
-sudo grep "POST /api/" /var/log/nginx/access.log | grep -v "200"
+sudo grep "POST /api/" /var/log/nginx/api_access.log | grep -v "200"
+
+# 统计请求最多的 IP
+awk '{print $1}' /var/log/nginx/api_access.log | sort | uniq -c | sort -rn | head -20
+
+# 查找 4xx/5xx 错误
+grep -E ' (4[0-9]{2}|5[0-9]{2}) ' /var/log/nginx/api_access.log | tail -50
 ```
 
 **Docker 容器日志**：
@@ -341,29 +413,97 @@ docker-compose logs -f checksum-api
 docker-compose logs checksum-api | grep -i error
 ```
 
-### 入侵检测
+### IP 封禁管理 ⭐
 
-安装 Fail2ban 防止暴力攻击：
+#### 快速封禁恶意 IP
+
+```bash
+# 封禁单个 IP
+sudo ./block-ip.sh 192.168.1.100
+
+# 封禁 IP 段（手动添加到黑名单）
+echo "deny 192.168.1.0/24;" | sudo tee -a /etc/nginx/conf.d/blacklist.conf
+sudo systemctl reload nginx
+```
+
+#### 解封 IP
+
+```bash
+# 解封 IP
+sudo ./unblock-ip.sh 192.168.1.100
+```
+
+#### 查看被封禁的 IP
+
+```bash
+# 查看 Nginx 黑名单
+sudo cat /etc/nginx/conf.d/blacklist.conf
+
+# 查看 iptables 封禁规则
+sudo iptables -L INPUT -n -v | grep DROP
+
+# 查看 Fail2ban 封禁列表
+sudo fail2ban-client status nginx-limit-req
+```
+
+### Fail2ban 自动防护
+
+**使用脚本自动配置（推荐）**：
+
+```bash
+sudo ./setup-api-protection.sh
+# 选择安装 Fail2ban，脚本会自动配置
+```
+
+**手动安装和配置**：
 
 ```bash
 # 安装 Fail2ban
 sudo apt install fail2ban
 
-# 配置 Nginx 保护
-sudo nano /etc/fail2ban/jail.local
+# 配置已在 setup-api-protection.sh 中自动生成
+# 或手动编辑
+sudo nano /etc/fail2ban/jail.d/nginx-api.conf
 ```
 
-添加配置：
+自动配置内容：
 
 ```ini
 [nginx-limit-req]
 enabled = true
 filter = nginx-limit-req
 action = iptables-multiport[name=ReqLimit, port="http,https", protocol=tcp]
-logpath = /var/log/nginx/error.log
-findtime = 600
-bantime = 7200
-maxretry = 10
+logpath = /var/log/nginx/api_error.log
+findtime = 600     # 10 分钟内
+bantime = 3600     # 封禁 1 小时
+maxretry = 10      # 触发 10 次后封禁
+
+[nginx-badbots]
+enabled = true
+filter = nginx-badbots
+logpath = /var/log/nginx/api_access.log
+findtime = 86400   # 24 小时内
+bantime = 86400    # 封禁 24 小时
+maxretry = 5       # 触发 5 次后封禁
+```
+
+**Fail2ban 管理命令**：
+
+```bash
+# 查看状态
+sudo fail2ban-client status
+
+# 查看特定监狱的状态
+sudo fail2ban-client status nginx-limit-req
+
+# 手动封禁 IP
+sudo fail2ban-client set nginx-limit-req banip 192.168.1.100
+
+# 手动解封 IP
+sudo fail2ban-client set nginx-limit-req unbanip 192.168.1.100
+
+# 重启 Fail2ban
+sudo systemctl restart fail2ban
 ```
 
 ---
