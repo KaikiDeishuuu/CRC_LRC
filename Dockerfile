@@ -55,8 +55,8 @@ WORKDIR /app
 # 从构建阶段复制二进制文件
 COPY --from=backend-builder /app/checksum-api .
 
-# 从前端构建阶段复制静态文件
-COPY --from=frontend-builder /app/frontend/dist ./web
+# 从前端构建阶段复制静态文件（保持原路径结构）
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # 复制配置文件
 COPY --from=backend-builder /app/config ./config
