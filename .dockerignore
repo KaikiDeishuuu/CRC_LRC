@@ -26,15 +26,7 @@ test/
 # 前端开发文件
 frontend/node_modules
 frontend/.yarn
-frontend/src
-frontend/*.ts
-frontend/*.js
-frontend/*.json
-frontend/tsconfig.json
-frontend/postcss.config.js
-frontend/tailwind.config.js
-frontend/vite.config.ts
-frontend/yarn.lock
+# 注意：保留 frontend/src、frontend/*.json 等文件，Docker 构建需要它们
 
 # 开发配置
 docker-compose*.yml
