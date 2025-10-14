@@ -42,6 +42,7 @@ sudo ./block-8080.sh
 ```
 
 **脚本功能**：
+
 - ✅ 允许本地（localhost）访问 8080
 - ❌ 拒绝外部（公网）访问 8080
 - ✅ Nginx 反向代理仍然正常工作
@@ -59,8 +60,9 @@ sudo iptables -L INPUT -n -v --line-numbers | grep 8080
 ```
 
 **规则解释**：
-- 第1条：允许本地回环接口（lo）访问 → Nginx 可以访问
-- 第2条：拒绝所有其他接口访问 → 公网无法直接访问
+
+- 第 1 条：允许本地回环接口（lo）访问 → Nginx 可以访问
+- 第 2 条：拒绝所有其他接口访问 → 公网无法直接访问
 
 ### 手动配置防火墙
 
@@ -123,10 +125,11 @@ curl https://your-domain.com/
 services:
   checksum-api:
     ports:
-      - "127.0.0.1:8080:8080"  # ✅ 只绑定到 localhost
+      - "127.0.0.1:8080:8080" # ✅ 只绑定到 localhost
 ```
 
 **效果**：
+
 - Docker 只监听 `127.0.0.1:8080`
 - 外部无法直接访问，即使防火墙规则失效
 - Nginx 仍然可以通过 `localhost:8080` 访问
@@ -135,11 +138,12 @@ services:
 
 ```yaml
 ports:
-  - "8080:8080"              # ❌ 绑定到所有接口
-  - "0.0.0.0:8080:8080"      # ❌ 显式绑定到所有接口
+  - "8080:8080" # ❌ 绑定到所有接口
+  - "0.0.0.0:8080:8080" # ❌ 显式绑定到所有接口
 ```
 
 **风险**：
+
 - Docker 监听所有网络接口
 - 如果防火墙配置失败，8080 端口将暴露到公网
 - 潜在的安全漏洞
@@ -156,12 +160,12 @@ ports:
 http {
     # 定义限流区域
     limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
-    
+
     server {
         location /api/ {
             # 应用限流（每秒 10 个请求，突发 20 个）
             limit_req zone=api_limit burst=20 nodelay;
-            
+
             proxy_pass http://localhost:8080/api/;
             # ... 其他配置
         }
@@ -175,7 +179,7 @@ http {
 http {
     # 隐藏 Nginx 版本号
     server_tokens off;
-    
+
     # 自定义 Server 头
     more_set_headers "Server: WebServer";
 }
@@ -189,10 +193,10 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-XSS-Protection "1; mode=block" always;
-    
+
     # 内容安全策略
     add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';" always;
-    
+
     # HTTPS 强制
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 }
@@ -207,10 +211,10 @@ location /api/ {
     # 允许特定 IP
     allow 192.168.1.0/24;
     allow 10.0.0.1;
-    
+
     # 拒绝其他所有
     deny all;
-    
+
     proxy_pass http://localhost:8080/api/;
 }
 ```
@@ -240,22 +244,22 @@ sudo certbot renew --dry-run
 ```nginx
 server {
     listen 443 ssl http2;
-    
+
     # SSL 证书
     ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-    
+
     # SSL 协议（只允许 TLS 1.2+）
     ssl_protocols TLSv1.2 TLSv1.3;
-    
+
     # 强加密套件
     ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
     ssl_prefer_server_ciphers on;
-    
+
     # OCSP Stapling
     ssl_stapling on;
     ssl_stapling_verify on;
-    
+
     # SSL 会话缓存
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
@@ -275,19 +279,19 @@ services:
   checksum-api:
     # 只读文件系统
     read_only: true
-    
+
     # 临时目录（只读文件系统需要）
     tmpfs:
       - /tmp
-    
+
     # 禁止权限提升
     security_opt:
       - no-new-privileges:true
-    
+
     # 删除所有 Linux 能力
     cap_drop:
       - ALL
-    
+
     # 限制资源
     deploy:
       resources:
@@ -439,6 +443,7 @@ sudo netfilter-persistent save
 ## 📞 获取帮助
 
 如有安全问题，请：
+
 1. 查看 [DEPLOYMENT.md](./DEPLOYMENT.md) 完整部署文档
 2. 运行 `./debug-docker.sh` 诊断脚本
 3. 检查防火墙规则：`sudo iptables -L -n -v`

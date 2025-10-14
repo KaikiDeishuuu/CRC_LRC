@@ -33,15 +33,15 @@ sudo ./install-nginx-config.sh
 
 项目提供了完整的管理脚本：
 
-| 脚本 | 用途 | 使用方法 |
-|------|------|----------|
-| `deploy.sh` | 完整部署流程 | `./deploy.sh deploy` |
-| `restart.sh` | 快速重启服务 | `./restart.sh` |
-| `clean-docker.sh` | 清理 Docker 空间 | `./clean-docker.sh` |
-| `debug-docker.sh` | 调试容器问题 | `./debug-docker.sh` |
-| `block-8080.sh` | 配置防火墙规则 | `sudo ./block-8080.sh` |
-| `cleanup-8080-rules.sh` | 清理防火墙规则 | `sudo ./cleanup-8080-rules.sh` |
-| `install-nginx-config.sh` | 自动配置 Nginx | `sudo ./install-nginx-config.sh` |
+| 脚本                      | 用途             | 使用方法                         |
+| ------------------------- | ---------------- | -------------------------------- |
+| `deploy.sh`               | 完整部署流程     | `./deploy.sh deploy`             |
+| `restart.sh`              | 快速重启服务     | `./restart.sh`                   |
+| `clean-docker.sh`         | 清理 Docker 空间 | `./clean-docker.sh`              |
+| `debug-docker.sh`         | 调试容器问题     | `./debug-docker.sh`              |
+| `block-8080.sh`           | 配置防火墙规则   | `sudo ./block-8080.sh`           |
+| `cleanup-8080-rules.sh`   | 清理防火墙规则   | `sudo ./cleanup-8080-rules.sh`   |
+| `install-nginx-config.sh` | 自动配置 Nginx   | `sudo ./install-nginx-config.sh` |
 
 ### deploy.sh 命令
 
@@ -297,6 +297,7 @@ sudo ./block-8080.sh
 ```
 
 这个脚本会：
+
 - ✅ 允许本地（localhost）访问 8080 端口
 - ❌ 拒绝外部（公网）直接访问 8080 端口
 - ✅ Nginx 反向代理仍然可以正常工作
@@ -343,15 +344,15 @@ sudo ./cleanup-8080-rules.sh
 services:
   checksum-api:
     ports:
-      - "127.0.0.1:8080:8080"  # 只监听 localhost
+      - "127.0.0.1:8080:8080" # 只监听 localhost
 ```
 
 **不推荐** - 绑定到所有接口：
 
 ```yaml
 ports:
-  - "8080:8080"  # 不安全，对外暴露
-  - "0.0.0.0:8080:8080"  # 不安全，对外暴露
+  - "8080:8080" # 不安全，对外暴露
+  - "0.0.0.0:8080:8080" # 不安全，对外暴露
 ```
 
 ### 3. Nginx 限流配置
@@ -442,6 +443,7 @@ docker-compose logs --tail=100 checksum-api
 ```
 
 这个脚本会自动检查：
+
 - 容器状态和日志
 - 容器内文件结构
 - 配置文件是否存在
