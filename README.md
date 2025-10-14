@@ -1,6 +1,24 @@
 # CRC/LRC 校验计算器
 
+<div align="center">
+
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)
+![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
+![Docker](https://img.shields.io/badge/docker-ready-brightgreen?logo=docker)
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey)
+
 一个功能强大的校验值计算工具，提供 RESTful API 和 Web 界面，支持多种常用校验算法。
+
+[🚀 快速开始](#-快速开始) •
+[📖 文档](#-文档) •
+[🐳 Docker 部署](#-docker-部署) •
+[🤝 贡献](#-贡献) •
+[📄 许可证](#-许可证)
+
+</div>
+
+---
 
 ## ✨ 特性
 
@@ -338,27 +356,170 @@ Go 应用 (监听 8080)
 
 ## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request！
+欢迎所有形式的贡献！无论是报告 Bug、提出新功能建议、改进文档，还是提交代码。
+
+### 快速开始
+
+1. **Fork 本仓库**
+2. **创建特性分支** (`git checkout -b feature/AmazingFeature`)
+3. **提交更改** (`git commit -m 'feat: add some amazing feature'`)
+4. **推送到分支** (`git push origin feature/AmazingFeature`)
+5. **提交 Pull Request**
+
+### 详细指南
+
+请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解：
+
+- 开发环境设置
+- 代码规范和风格
+- 提交消息规范
+- Pull Request 流程
+- 如何添加新算法
 
 ### 添加新算法
 
-1. 在 `internal/calculator/types.go` 添加常量
-2. 在 `internal/calculator/calculator.go` 实现算法
-3. 更新 handler 返回结果
-4. 添加测试用例
+1. 在 `internal/calculator/types.go` 添加算法常量
+2. 在 `internal/calculator/calculator.go` 实现算法函数
+3. 更新 `internal/handler/` 中的 handler 返回新算法结果
+4. 在 `API_DOCUMENTATION.md` 中添加文档
+5. 添加测试用例并运行 `go test ./...`
+6. 更新前端 `frontend/src/app.ts` 显示新算法
 
-## 📄 许可
+### 代码规范
 
-MIT License
+- Go 代码遵循 `gofmt` 标准格式
+- TypeScript 代码使用 ESLint 规则
+- 提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/)
+- 为新功能添加测试
 
-## 🔗 相关资源
+### 报告 Bug
 
-- [MODBUS 协议规范](https://modbus.org)
-- [CRC 算法详解](https://en.wikipedia.org/wiki/Cyclic_redundancy_check)
-- [Gorilla Mux 文档](https://github.com/gorilla/mux)
+请使用 [GitHub Issues](https://github.com/KaikiDeishuuu/CRC_LRC/issues) 报告 Bug，并包含：
+
+- 操作系统和版本
+- Go 版本
+- 重现步骤
+- 期望行为
+- 实际行为
+- 错误日志（如有）
+
+### 功能请求
+
+欢迎提出新功能建议！请在 Issue 中详细描述：
+
+- 功能描述
+- 使用场景
+- 期望的 API/界面设计
+- 是否愿意贡献代码实现
 
 ---
 
+## 📄 许可证
+
+本项目采用 **GNU General Public License v3.0** 许可证。
+
+这意味着您可以：
+
+- ✅ **自由使用** - 将本软件用于任何目的
+- ✅ **自由研究** - 学习程序工作原理并根据需求修改
+- ✅ **自由分发** - 重新分发副本
+- ✅ **自由改进** - 改进程序并向公众发布改进版本
+
+但必须遵守以下条款：
+
+- 📋 **开源要求** - 修改后的版本也必须以 GPL-3.0 许可发布
+- 📝 **声明修改** - 必须标注对原作品的修改
+- 🔗 **保留许可** - 必须保留原始许可证和版权声明
+- 💼 **无担保** - 软件按"原样"提供，不提供任何明示或暗示的担保
+
+详细信息请查看 [LICENSE](./LICENSE) 文件。
+
+### 为什么选择 GPL-3.0？
+
+我们选择 GPL-3.0 许可证是为了：
+
+1. 保证软件始终保持开源和自由
+2. 确保所有改进都能回馈社区
+3. 防止专有软件闭源使用
+4. 保护用户的自由权利
+
+### 第三方许可
+
+本项目使用的开源库：
+
+- [Gorilla Mux](https://github.com/gorilla/mux) - BSD-3-Clause License
+- [Viper](https://github.com/spf13/viper) - MIT License
+- [Vite](https://github.com/vitejs/vite) - MIT License
+- [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) - MIT License
+
+### 商业使用
+
+如需在专有/闭源软件中使用本项目，请联系作者讨论商业许可选项。
+
+## �‍💻 作者
+
+**KaikiDeishuuu**
+
+- GitHub: [@KaikiDeishuuu](https://github.com/KaikiDeishuuu)
+- Repository: [CRC_LRC](https://github.com/KaikiDeishuuu/CRC_LRC)
+
+## 🌟 Star 历史
+
+如果这个项目对你有帮助，请给个 ⭐ Star 支持一下！
+
+## �🔗 相关资源
+
+### 技术文档
+
+- [MODBUS 协议规范](https://modbus.org)
+- [CRC 算法详解](https://en.wikipedia.org/wiki/Cyclic_redundancy_check)
+- [RFC 1071 - Computing the Internet Checksum](https://tools.ietf.org/html/rfc1071)
+
+### 开源项目
+
+- [Gorilla Mux](https://github.com/gorilla/mux) - HTTP 路由器
+- [Vite](https://vitejs.dev/) - 前端构建工具
+- [Tailwind CSS](https://tailwindcss.com/) - CSS 框架
+
+### 相关工具
+
+- [CRC RevEng](https://reveng.sourceforge.io/) - CRC 参数查找工具
+- [Online CRC Calculator](https://crccalc.com/) - 在线 CRC 计算器
+
+## 💬 社区与支持
+
+- **问题反馈**: [GitHub Issues](https://github.com/KaikiDeishuuu/CRC_LRC/issues)
+- **功能建议**: [GitHub Discussions](https://github.com/KaikiDeishuuu/CRC_LRC/discussions)
+- **安全问题**: 请私下联系维护者
+
+## 🙏 致谢
+
+感谢所有为本项目做出贡献的开发者！
+
+特别感谢以下开源项目：
+
+- Go 编程语言团队
+- Gorilla Web Toolkit 团队
+- Vite 和 Tailwind CSS 社区
+
+## 📈 项目统计
+
+![GitHub stars](https://img.shields.io/github/stars/KaikiDeishuuu/CRC_LRC?style=social)
+![GitHub forks](https://img.shields.io/github/forks/KaikiDeishuuu/CRC_LRC?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/KaikiDeishuuu/CRC_LRC?style=social)
+
+---
+
+<div align="center">
+
 **项目路径**: `/home/GoProjects/WebAPI/CRC_LRC`  
-**API 版本**: v1.1.0  
+**当前版本**: v1.2.0  
 **更新日期**: 2025-10-14
+
+Made with ❤️ by [KaikiDeishuuu](https://github.com/KaikiDeishuuu)
+
+如果这个项目对你有帮助，请考虑给个 ⭐ Star！
+
+[⬆ 回到顶部](#crc-lrc-校验计算器)
+
+</div>
