@@ -17,7 +17,7 @@ COPY frontend/ ./
 RUN yarn build
 
 # 阶段2: 构建 Go 后端
-FROM golang:1.23-alpine AS backend-builder
+FROM golang:alpine AS backend-builder
 
 WORKDIR /app
 
