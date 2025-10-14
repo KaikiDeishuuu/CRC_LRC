@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRC / Checksum API Tool</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 2em; line-height: 1.6; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 0.5em; margin-top: 1.5em; }
+        h1 { text-align: center; color: #007bff; }
+        code { background-color: #e9ecef; padding: 0.2em 0.4em; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #c0392b; }
+        pre { background-color: #282c34; color: #abb2bf; padding: 1em; border-radius: 6px; overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', monospace; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        form { margin-top: 1.5em; padding: 1.5em; border: 1px solid #ddd; border-radius: 8px; background-color: #fcfcfc; }
+        label { display: block; margin-bottom: 0.5em; font-weight: bold; color: #555; }
+        input[type="text"], input[type="file"], select, button {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        select { width: 100%; cursor: pointer; background-color: #fff; }
+        select:focus { border-color: #007bff; outline: none; }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: auto;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover { background-color: #218838; }
+        #results { margin-top: 2em; padding: 1em; border: 1px dashed #a7d9b7; background-color: #e6ffe6; border-radius: 6px; }
+        .result-item { margin-bottom: 0.8em; }
+        .result-item strong { color: #007bff; }
+        .error { color: #dc3545; font-weight: bold; }
+        footer { text-align: center; margin-top: 3em; color: #777; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CRC / Checksum API Tool</h1>
+        <p>This tool provides various checksum calculations via a web API.</p>
+
+        <h2>📖 API 文档</h2>
+        
+        <h3>1️⃣ 字符串/十六进制输入 (GET)</h3>
+        <p><code>GET /api/v1/checksum?input=YOUR_STRING_OR_HEX</code></p>
+        
+        <p><strong>输入格式：</strong></p>
+        <ul>
+            <li><strong>文本字符串：</strong> 直接输入文本，如 <code>HelloGo</code></li>
+            <li><strong>十六进制：</strong> 以 <code>0x</code> 开头，如 <code>0x48656C6C6F476F</code></li>
+            <li><strong>十六进制（带空格）：</strong> 如 <code>0x48 65 6C 6C 6F 47 6F</code></li>
+        </ul>
+        
+        <p><strong>示例请求：</strong></p>
+        <ul>
+            <li><code>/api/v1/checksum?input=HelloGo</code> - 文本输入</li>
+            <li><code>/api/v1/checksum?input=0x48656C6C6F476F</code> - 十六进制输入（无空格）</li>
+        </ul>
+        
+        <p><strong>响应示例：</strong></p>
+        <pre><code class="language-json">{
+  "input": "HelloGo",
+  "inputBytesHex": "48656c6c6f476f",
+  "results": {
+    "CRC16_CCITT": {
+      "decimal": 49195,
+      "hex": "0xC08B"
+    },
+    "CRC16_MODBUS": {
+      "decimal": 57975,
+      "hex": "0x77E2"
+    },
+    "CRC32_IEEE": {
+      "decimal": 3762696614,
+      "hex": "0xDFF7B826"
+    },
+    "SUM8": {
+      "decimal": 72,
+      "hex": "0x48"
+    }
+  }
+}</code></pre>
+
+        <h3>2️⃣ 文件上传 (POST)</h3>
+        <p><code>POST /api/v1/file-checksum</code></p>
+        
+        <p><strong>上传要求：</strong></p>
+        <ul>
+            <li><strong>Content-Type：</strong> <code>multipart/form-data</code></li>
+            <li><strong>字段名：</strong> <code>file</code></li>
+            <li><strong>文件格式：</strong> 支持任意二进制文件（.bin, .hex, .txt, .dat 等）</li>
+            <li><strong>文件大小限制：</strong> 最大 10 MB（可在配置文件中调整）</li>
+        </ul>
+        
+        <p><strong>支持的文件类型示例：</strong></p>
+        <ul>
+            <li>二进制文件：<code>.bin</code>, <code>.dat</code></li>
+            <li>文本文件：<code>.txt</code>, <code>.log</code></li>
+            <li>十六进制文件：<code>.hex</code>, <code>.ihex</code></li>
+            <li>其他：任意格式的文件都可以计算校验和</li>
+        </ul>
+        
+        <p><strong>响应示例：</strong></p>
+        <pre><code class="language-json">{
+  "input": "File: example.bin (Size: 1024 bytes)",
+  "inputBytesHex": "48656c6c6f...",
+  "results": { /* 与字符串输入相同的结果格式 */ }
+}</code></pre>
+
+        <h3>3️⃣ 支持的校验算法</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1em;">
+            <thead>
+                <tr style="background-color: #007bff; color: white;">
+                    <th style="padding: 0.8em; border: 1px solid #ddd;">算法</th>
+                    <th style="padding: 0.8em; border: 1px solid #ddd;">说明</th>
+                    <th style="padding: 0.8em; border: 1px solid #ddd;">应用场景</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;"><strong>CRC16_MODBUS</strong></td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">多项式 0xA001，初始值 0xFFFF</td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">Modbus 协议、工业通信</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;"><strong>CRC16_CCITT</strong></td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">多项式 0x1021，初始值 0xFFFF</td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">X.25 协议、蓝牙通信</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;"><strong>CRC32_IEEE</strong></td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">标准 CRC32（IEEE 802.3）</td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">以太网、ZIP、PNG、MPEG-2</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;"><strong>SUM8</strong></td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">8位累加和校验</td>
+                    <td style="padding: 0.8em; border: 1px solid #ddd;">简单校验、NMEA 协议</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>🔧 在线测试工具</h2>
+
+        <form id="checksumForm">
+            <label for="inputFormat">输入格式：</label>
+            <select id="inputFormat" style="width: 100%; padding: 10px; margin-bottom: 1em; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;">
+                <option value="text">文本字符串 (Text)</option>
+                <option value="hex">十六进制 (HEX)</option>
+            </select>
+
+            <label for="inputString">输入内容：</label>
+            <input type="text" id="inputString" placeholder="请输入内容...">
+            <small id="inputHint" style="display: block; color: #666; margin-top: -0.8em; margin-bottom: 1em;">
+                示例：HelloGo
+            </small>
+            <button type="submit">计算校验和</button>
+        </form>
+
+        <form id="fileUploadForm" enctype="multipart/form-data">
+            <label for="fileInput">或上传文件：</label>
+            <input type="file" id="fileInput" name="file">
+            <small style="display: block; color: #666; margin-top: -0.8em; margin-bottom: 1em;">
+                支持任意格式文件（.bin, .hex, .txt, .dat 等），最大 10 MB
+            </small>
+            <button type="submit">上传并计算</button>
+        </form>
+
+        <div id="results">
+            <h3>📊 计算结果：</h3>
+            <pre id="jsonOutput" style="min-height: 100px;">等待输入...</pre>
+        </div>
+
+        <footer>
+            <p>&copy; 2023 Go Checksum API Tool</p>
+        </footer>
+    </div>
+
+    <script>
+        // 监听输入格式变化
+        const inputFormatSelect = document.getElementById('inputFormat');
+        const inputStringField = document.getElementById('inputString');
+        const inputHint = document.getElementById('inputHint');
+
+        inputFormatSelect.addEventListener('change', function() {
+            if (this.value === 'hex') {
+                inputStringField.placeholder = '请输入十六进制（如：33 01 13 00 或 33011300）';
+                inputHint.textContent = '示例：33 01 13 00 或 33011300';
+            } else {
+                inputStringField.placeholder = '请输入文本字符串...';
+                inputHint.textContent = '示例：HelloGo';
+            }
+        });
+
+        // 格式化十六进制字符串为 "XX XX XX" 格式
+        function formatHexString(hexStr) {
+            // 移除所有空格和0x前缀
+            hexStr = hexStr.replace(/\s+/g, '').replace(/^0x/i, '');
+            // 每两个字符添加一个空格
+            return hexStr.match(/.{1,2}/g)?.join(' ').toUpperCase() || hexStr;
+        }
+
+        // 处理输入并自动格式化十六进制
+        inputStringField.addEventListener('input', function() {
+            if (inputFormatSelect.value === 'hex') {
+                const cursorPos = this.selectionStart;
+                const oldValue = this.value;
+                const cleanValue = oldValue.replace(/[^0-9a-fA-F\s]/g, '');
+                
+                if (cleanValue !== oldValue) {
+                    this.value = cleanValue;
+                }
+            }
+        });
+
+        document.getElementById('checksumForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            let inputString = document.getElementById('inputString').value.trim();
+            const inputFormat = document.getElementById('inputFormat').value;
+            const outputDiv = document.getElementById('jsonOutput');
+            outputDiv.textContent = '计算中...';
+
+            if (!inputString) {
+                outputDiv.textContent = JSON.stringify({ error: { code: 400, message: "输入不能为空" }}, null, 2);
+                return;
+            }
+
+            // 如果是十六进制格式，添加0x前缀并移除空格
+            if (inputFormat === 'hex') {
+                inputString = '0x' + inputString.replace(/\s+/g, '').replace(/^0x/i, '');
+            }
+
+            try {
+                const response = await fetch(`/api/v1/checksum?input=${encodeURIComponent(inputString)}`);
+                const data = await response.json();
+                
+                // 格式化 inputBytesHex 为 "XX XX XX" 格式
+                if (data.inputBytesHex) {
+                    data.inputBytesHexFormatted = formatHexString(data.inputBytesHex);
+                }
+                
+                outputDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                outputDiv.textContent = JSON.stringify({ error: { code: 500, message: `请求失败: ${error.message}` }}, null, 2);
+                console.error('Error:', error);
+            }
+        });
+
+        document.getElementById('fileUploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('fileInput');
+            const outputDiv = document.getElementById('jsonOutput');
+            outputDiv.textContent = '上传并计算中...';
+
+            if (fileInput.files.length === 0) {
+                outputDiv.textContent = JSON.stringify({ error: { code: 400, message: "请选择要上传的文件" }}, null, 2);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/api/v1/file-checksum', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                // 格式化 inputBytesHex 为 "XX XX XX" 格式（仅显示前100个字节）
+                if (data.inputBytesHex) {
+                    const hexStr = data.inputBytesHex.substring(0, 200); // 前100字节
+                    data.inputBytesHexFormatted = formatHexString(hexStr);
+                    if (data.inputBytesHex.length > 200) {
+                        data.inputBytesHexFormatted += ' ...';
+                    }
+                }
+                
+                outputDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                outputDiv.textContent = JSON.stringify({ error: { code: 500, message: `文件上传失败: ${error.message}` }}, null, 2);
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

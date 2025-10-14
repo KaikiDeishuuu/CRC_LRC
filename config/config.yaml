@@ -1,0 +1,13 @@
+server:
+  port: 8080
+  readTimeout: 5s
+  writeTimeout: 10s
+  idleTimeout: 15s
+  maxHeaderBytes: 1048576 # 1MB
+
+log:
+  level: info # debug, info, warn, error
+
+checksum:
+  maxInputLengthBytes: 1048576 # 1MB
+  maxFileUploadSizeMB: 10 # 10MB

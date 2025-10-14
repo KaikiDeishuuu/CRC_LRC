@@ -1,0 +1,62 @@
+# .dockerignore
+# 排除不需要打包到镜像中的文件
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# 文档
+*.md
+README.md
+DEPLOYMENT.md
+API_DOCUMENTATION.md
+COPY_FEATURE.md
+IMPROVEMENTS.md
+
+# 测试
+*_test.go
+test/
+
+# 前端开发文件
+frontend/node_modules
+frontend/.yarn
+frontend/src
+frontend/*.ts
+frontend/*.js
+frontend/*.json
+frontend/tsconfig.json
+frontend/postcss.config.js
+frontend/tailwind.config.js
+frontend/vite.config.ts
+frontend/yarn.lock
+
+# 开发配置
+docker-compose*.yml
+Dockerfile
+nginx.conf
+
+# 临时文件
+*.log
+*.tmp
+*.bak
+tmp/
+logs/
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 二进制文件（避免重复）
+bin/
+*.exe
+checksum-api
+
+# 环境变量
+.env
+.env.local

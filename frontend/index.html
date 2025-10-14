@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>校验和计算器 - 专业版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .input-section {
+        transition: all 0.3s ease-in-out;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .result-card {
+        transition: all 0.2s ease;
+      }
+      .result-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
+      .copy-btn {
+        transition: all 0.2s ease;
+      }
+      .copy-btn:hover {
+        transform: scale(1.05);
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background: #10b981;
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease;
+        z-index: 1000;
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen"
+  >
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <h1
+          class="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3"
+        >
+          校验和计算器
+        </h1>
+        <p class="text-xl text-gray-600">
+          支持 CRC16/CRC32/LRC/SUM8/MODBUS RTU 等多种校验算法
+        </p>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Panel: Input -->
+        <div class="lg:col-span-1 space-y-6">
+          <!-- Calculation Type -->
+          <div
+            class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+          >
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <svg
+                class="w-6 h-6 mr-2 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                ></path>
+              </svg>
+              校验算法
+            </h2>
+            <div class="space-y-2">
+              <label
+                class="flex items-center p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition"
+              >
+                <input
+                  type="checkbox"
+                  name="calcType"
+                  value="crc16_modbus"
+                  class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  checked
+                />
+                <div class="ml-3">
+                  <span class="block text-base font-semibold text-gray-900"
+                    >CRC16 MODBUS</span
+                  >
+                  <span class="block text-xs text-gray-500"
+                    >工业标准，低字节在前</span
+                  >
+                </div>
+              </label>
+              <label
+                class="flex items-center p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition"
+              >
+                <input
+                  type="checkbox"
+                  name="calcType"
+                  value="crc16_ccitt"
+                  class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div class="ml-3">
+                  <span class="block text-base font-semibold text-gray-900"
+                    >CRC16 CCITT</span
+                  >
+                  <span class="block text-xs text-gray-500">电信标准</span>
+                </div>
+              </label>
+              <label
+                class="flex items-center p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition"
+              >
+                <input
+                  type="checkbox"
+                  name="calcType"
+                  value="crc32"
+                  class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div class="ml-3">
+                  <span class="block text-base font-semibold text-gray-900"
+                    >CRC32 IEEE</span
+                  >
+                  <span class="block text-xs text-gray-500"
+                    >32位循环冗余校验</span
+                  >
+                </div>
+              </label>
+              <label
+                class="flex items-center p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition"
+              >
+                <input
+                  type="checkbox"
+                  name="calcType"
+                  value="lrc"
+                  class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div class="ml-3">
+                  <span class="block text-base font-semibold text-gray-900"
+                    >LRC</span
+                  >
+                  <span class="block text-xs text-gray-500">纵向冗余校验</span>
+                </div>
+              </label>
+              <label
+                class="flex items-center p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition"
+              >
+                <input
+                  type="checkbox"
+                  name="calcType"
+                  value="sum8"
+                  class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div class="ml-3">
+                  <span class="block text-base font-semibold text-gray-900"
+                    >SUM8</span
+                  >
+                  <span class="block text-xs text-gray-500">8位累加和</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Input Method -->
+          <div
+            class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+          >
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <svg
+                class="w-6 h-6 mr-2 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                ></path>
+              </svg>
+              输入方式
+            </h2>
+            <div class="space-y-2">
+              <label
+                class="flex items-center p-3 rounded-lg hover:bg-green-50 cursor-pointer transition"
+              >
+                <input
+                  type="radio"
+                  name="inputMethod"
+                  value="text"
+                  class="w-5 h-5 text-green-600 focus:ring-2 focus:ring-green-500"
+                  checked
+                />
+                <span class="ml-3 text-base font-semibold text-gray-900"
+                  >文本输入</span
+                >
+              </label>
+              <label
+                class="flex items-center p-3 rounded-lg hover:bg-green-50 cursor-pointer transition"
+              >
+                <input
+                  type="radio"
+                  name="inputMethod"
+                  value="hex"
+                  class="w-5 h-5 text-green-600 focus:ring-2 focus:ring-green-500"
+                />
+                <span class="ml-3 text-base font-semibold text-gray-900"
+                  >HEX输入</span
+                >
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Panel: Data Input -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Data Input -->
+          <div
+            class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+          >
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <svg
+                class="w-6 h-6 mr-2 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                ></path>
+              </svg>
+              数据输入
+            </h2>
+
+            <!-- Text Input -->
+            <div id="textInput" class="input-section">
+              <label
+                for="textData"
+                class="block text-base font-medium text-gray-700 mb-2"
+                >输入文本数据</label
+              >
+              <textarea
+                id="textData"
+                rows="8"
+                class="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="请输入要计算的文本数据...&#10;&#10;示例：Hello World"
+              ></textarea>
+              <div class="mt-2 flex justify-between text-sm text-gray-500">
+                <span id="textLength">字符数：0</span>
+                <button
+                  onclick="clearInput()"
+                  class="text-red-500 hover:text-red-700 font-medium"
+                >
+                  清空
+                </button>
+              </div>
+            </div>
+
+            <!-- HEX Input -->
+            <div id="hexInput" class="input-section hidden">
+              <label
+                for="hexData"
+                class="block text-base font-medium text-gray-700 mb-2"
+                >输入HEX数据</label
+              >
+              <textarea
+                id="hexData"
+                rows="8"
+                class="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono transition"
+                placeholder="请输入HEX数据（自动格式化）&#10;&#10;示例：48 65 6C 6C 6F"
+              ></textarea>
+              <div class="mt-2 flex justify-between text-sm text-gray-500">
+                <span>输入时会自动格式化为两位一组，用空格分隔</span>
+                <button
+                  onclick="clearInput()"
+                  class="text-red-500 hover:text-red-700 font-medium"
+                >
+                  清空
+                </button>
+              </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button
+              id="calculateBtn"
+              onclick="performCalculation()"
+              class="mt-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
+            >
+              <svg
+                class="inline-block w-6 h-6 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                ></path>
+              </svg>
+              开始计算
+            </button>
+          </div>
+
+          <!-- Results -->
+          <div id="resultContainer" class="space-y-4">
+            <!-- Results will be inserted here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-12 text-center text-gray-500 text-sm">
+        <p>© 2025 校验和计算器 - 支持多种校验算法的在线工具</p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/app.ts"></script>
+  </body>
+</html>
