@@ -1,6 +1,23 @@
 # Docker 部署文档
 
-## 🚀 快速部署
+## 🚀 快速部署（一键部署）
+
+### 使用自动化部署脚本
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/KaikiDeishuuu/CRC_LRC.git
+cd CRC_LRC
+
+# 2. 运行一键部署脚本
+./deploy.sh deploy
+
+# 3. 配置防火墙（关闭 8080 对外访问）
+sudo ./block-8080.sh
+
+# 4. 配置 Nginx 反向代理（可选，如果未手动配置）
+sudo ./install-nginx-config.sh
+```
 
 ### 前提条件
 
@@ -9,6 +26,32 @@
 - Nginx 已安装（在宿主机）
 - 域名已解析到 VPS
 - （可选）SSL 证书（Let's Encrypt）
+
+---
+
+## 🛠️ 管理脚本
+
+项目提供了完整的管理脚本：
+
+| 脚本 | 用途 | 使用方法 |
+|------|------|----------|
+| `deploy.sh` | 完整部署流程 | `./deploy.sh deploy` |
+| `restart.sh` | 快速重启服务 | `./restart.sh` |
+| `clean-docker.sh` | 清理 Docker 空间 | `./clean-docker.sh` |
+| `debug-docker.sh` | 调试容器问题 | `./debug-docker.sh` |
+| `block-8080.sh` | 配置防火墙规则 | `sudo ./block-8080.sh` |
+| `cleanup-8080-rules.sh` | 清理防火墙规则 | `sudo ./cleanup-8080-rules.sh` |
+| `install-nginx-config.sh` | 自动配置 Nginx | `sudo ./install-nginx-config.sh` |
+
+### deploy.sh 命令
+
+```bash
+./deploy.sh deploy    # 完整部署（构建前端 + Docker）
+./deploy.sh stop      # 停止服务
+./deploy.sh restart   # 重启服务
+./deploy.sh logs      # 查看日志
+./deploy.sh status    # 查看状态
+```
 
 ---
 
@@ -244,22 +287,74 @@ docker-compose -f docker-compose-full.yml up -d --build
 
 ## 🔒 安全加固
 
-### 1. 限制 Docker 容器权限
+### 1. 防火墙配置（重要！）
 
-在 `docker-compose.yml` 中添加：
+**使用提供的脚本配置防火墙**：
+
+```bash
+# 关闭 8080 端口对外访问（推荐）
+sudo ./block-8080.sh
+```
+
+这个脚本会：
+- ✅ 允许本地（localhost）访问 8080 端口
+- ❌ 拒绝外部（公网）直接访问 8080 端口
+- ✅ Nginx 反向代理仍然可以正常工作
+- ✅ 规则自动保存，重启后依然生效
+
+**验证防火墙规则**：
+
+```bash
+# 查看 8080 端口规则
+sudo iptables -L INPUT -n -v --line-numbers | grep 8080
+
+# 应该看到：
+# 1. ACCEPT  tcp  --  lo  *  0.0.0.0/0  0.0.0.0/0  tcp dpt:8080
+# 2. DROP    tcp  --  *   *  0.0.0.0/0  0.0.0.0/0  tcp dpt:8080
+```
+
+**手动配置（如果没有使用脚本）**：
+
+```bash
+# 允许本地访问 8080
+sudo iptables -I INPUT 1 -i lo -p tcp --dport 8080 -j ACCEPT
+
+# 拒绝外部访问 8080
+sudo iptables -I INPUT 2 -p tcp --dport 8080 -j DROP
+
+# 保存规则
+sudo netfilter-persistent save
+# 或
+sudo iptables-save > /etc/iptables/rules.v4
+```
+
+**清理重复规则**：
+
+```bash
+# 如果规则被重复添加，使用清理脚本
+sudo ./cleanup-8080-rules.sh
+```
+
+### 2. Docker 端口绑定
+
+**推荐配置** - 只绑定到 localhost（已在 docker-compose.yml 中配置）：
 
 ```yaml
 services:
   checksum-api:
-    # ... 其他配置 ...
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
+    ports:
+      - "127.0.0.1:8080:8080"  # 只监听 localhost
 ```
 
-### 2. Nginx 限流配置
+**不推荐** - 绑定到所有接口：
+
+```yaml
+ports:
+  - "8080:8080"  # 不安全，对外暴露
+  - "0.0.0.0:8080:8080"  # 不安全，对外暴露
+```
+
+### 3. Nginx 限流配置
 
 在 `nginx.conf` 的 `http` 块中添加：
 
@@ -276,14 +371,19 @@ server {
 }
 ```
 
-### 3. 防火墙配置
+### 4. 限制 Docker 容器权限
 
-```bash
-# 只开放必要端口
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw deny 8080/tcp  # 不对外暴露 8080
-sudo ufw enable
+在 `docker-compose.yml` 中添加：
+
+```yaml
+services:
+  checksum-api:
+    # ... 其他配置 ...
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
 ```
 
 ---
@@ -334,6 +434,20 @@ docker-compose logs --tail=100 checksum-api
 
 ## 🚨 故障排查
 
+### 使用调试脚本
+
+```bash
+# 运行完整诊断
+./debug-docker.sh
+```
+
+这个脚本会自动检查：
+- 容器状态和日志
+- 容器内文件结构
+- 配置文件是否存在
+- 可执行文件权限
+- 端口占用情况
+
 ### 问题 1: 容器无法启动
 
 ```bash
@@ -341,10 +455,13 @@ docker-compose logs --tail=100 checksum-api
 docker-compose logs checksum-api
 
 # 检查端口占用
-sudo netstat -tulpn | grep 8080
+sudo ss -tlnp | grep 8080
 
 # 检查镜像构建
 docker-compose build --no-cache
+
+# 使用调试脚本
+./debug-docker.sh
 ```
 
 ### 问题 2: Nginx 502 Bad Gateway

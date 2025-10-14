@@ -49,30 +49,47 @@ go run .
 docker-compose up -d --build
 ```
 
-### 方式三：Docker + Nginx + HTTPS（VPS 部署）
+### 方式三：Docker + Nginx + HTTPS（VPS 部署推荐）
 
 详见 [DEPLOYMENT.md](./DEPLOYMENT.md) 完整部署文档。
 
-**快速步骤**：
+**一键部署脚本**：
 
 ```bash
-# 1. 构建并启动容器
-docker-compose up -d --build
+# 1. 克隆项目
+git clone https://github.com/KaikiDeishuuu/CRC_LRC.git
+cd CRC_LRC
 
-# 2. 配置 Nginx 反向代理
-sudo cp nginx.conf /etc/nginx/sites-available/checksum-api
-sudo ln -s /etc/nginx/sites-available/checksum-api /etc/nginx/sites-enabled/
+# 2. 完整部署（构建前端 + Docker）
+./deploy.sh deploy
 
-# 3. 修改域名并测试
-sudo nano /etc/nginx/sites-available/checksum-api
-sudo nginx -t
-sudo systemctl reload nginx
+# 3. 配置防火墙（关闭 8080 对外访问）
+sudo ./block-8080.sh
 
-# 4. 配置 SSL（Let's Encrypt）
-sudo certbot --nginx -d your-domain.com
+# 4. 配置 Nginx 反向代理（可选）
+sudo ./install-nginx-config.sh
+```
+
+**管理命令**：
+
+```bash
+./deploy.sh deploy    # 完整部署
+./deploy.sh stop      # 停止服务
+./deploy.sh logs      # 查看日志
+./restart.sh          # 快速重启
+./clean-docker.sh     # 清理空间
+./debug-docker.sh     # 调试问题
 ```
 
 访问：`https://your-domain.com`
+
+**安全架构**：
+
+```
+外部用户 → HTTPS (443) → Nginx 反向代理 → localhost:8080 → Docker 容器
+                                                     ↑
+                                            防火墙拒绝外部直接访问
+```
 
 ### 访问界面
 
