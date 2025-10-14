@@ -2,16 +2,16 @@
 # 阶段1: 构建前端
 FROM node:18-alpine AS frontend-builder
 
-WORKDIR /app/frontend
+WORKDIR /app
 
-# 复制前端依赖文件
-COPY frontend/package.json frontend/yarn.lock ./
+# 复制整个前端目录
+COPY frontend ./frontend
+
+# 切换到前端目录
+WORKDIR /app/frontend
 
 # 安装依赖
 RUN yarn install --frozen-lockfile
-
-# 复制前端源码
-COPY frontend/ ./
 
 # 构建前端
 RUN yarn build
