@@ -17,14 +17,14 @@ COPY frontend/ ./
 RUN yarn build
 
 # 阶段2: 构建 Go 后端
-FROM golang:1.21-alpine AS backend-builder
+FROM golang:1.23-alpine AS backend-builder
 
 WORKDIR /app
 
-# 安装必要的构建工具
+# 安装构建依赖
 RUN apk add --no-cache git
 
-# 复制 Go 模块文件
+# 复制 go.mod 和 go.sum
 COPY go.mod go.sum ./
 
 # 下载依赖
