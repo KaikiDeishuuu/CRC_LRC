@@ -496,7 +496,31 @@ sudo certbot renew --force-renewal
 ls -la /etc/letsencrypt/live/your-domain.com/
 ```
 
-### 问题 4: CORS 错误
+### 问题 4: Nginx 配置错误 - unknown directive "more_clear_headers"
+
+**错误原因**：`more_clear_headers` 需要 nginx-extras 模块
+
+**快速修复**：
+
+```bash
+# 方法 1: 使用自动修复脚本（推荐）
+sudo ./fix-nginx-config.sh
+
+# 方法 2: 一键命令修复
+sudo sed -i 's/^more_clear_headers/#more_clear_headers/g' /etc/nginx/snippets/api-protection.conf
+sudo sed -i 's/^more_set_headers/#more_set_headers/g' /etc/nginx/snippets/api-protection.conf
+sudo nginx -t
+sudo systemctl reload nginx
+
+# 方法 3: 安装 nginx-extras 模块（可选）
+sudo apt install nginx-extras  # Ubuntu/Debian
+```
+
+修复后的配置使用标准 Nginx 指令：
+- `server_tokens off` - 隐藏版本号
+- `proxy_hide_header X-Powered-By` - 隐藏后端信息
+
+### 问题 5: CORS 错误
 
 确保 Go 应用启用了 CORS。检查 `internal/router/router.go`：
 

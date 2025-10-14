@@ -56,6 +56,7 @@ sudo ./monitor-api.sh
 | 脚本                      | 用途                             |
 | ------------------------- | -------------------------------- |
 | `setup-api-protection.sh` | 配置速率限制、Fail2ban 等防护 ⭐ |
+| `fix-nginx-config.sh`     | 修复 Nginx 配置兼容性问题 ⭐     |
 | `monitor-api.sh`          | 监控 API 访问和异常行为 ⭐       |
 | `block-ip.sh`             | 快速封禁恶意 IP ⭐               |
 | `unblock-ip.sh`           | 解封 IP 地址 ⭐                  |
@@ -199,6 +200,13 @@ sudo ./setup-api-protection.sh
 - ✅ 安全响应头
 - ✅ Fail2ban 自动封禁
 - ✅ IP 黑名单功能
+- ✅ 使用标准 Nginx 指令（无需额外模块）
+
+**注意**：如果遇到 `unknown directive "more_clear_headers"` 错误，运行：
+
+```bash
+sudo ./fix-nginx-config.sh
+```
 
 ### 手动配置限流保护
 

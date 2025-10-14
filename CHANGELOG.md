@@ -17,6 +17,24 @@
 
 ---
 
+## [1.3.1] - 2025-10-14
+
+### 修复
+
+- 🔧 **Nginx 配置兼容性**
+  - 移除对 nginx-extras 模块的依赖
+  - 使用标准 Nginx 指令替代 `more_clear_headers`
+  - 添加 `fix-nginx-config.sh` 自动修复脚本
+  - 更新 `setup-api-protection.sh` 使用兼容配置
+
+### 改进
+
+- 📖 使用 `server_tokens off` 隐藏 Nginx 版本
+- 📖 使用 `proxy_hide_header` 替代 `more_clear_headers`
+- 📖 配置文件注释说明可选的 headers-more 模块
+
+---
+
 ## [1.3.0] - 2025-10-14
 
 ### 新增 - 安全防护 ⭐

@@ -116,14 +116,14 @@ curl -X POST http://localhost:8080/api/checksum \
 
 ## 📖 文档
 
-| 文档 | 说明 |
-|------|------|
-| [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) | 完整 API 接口文档 |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | 生产环境部署指南 ⭐ |
-| [SECURITY.md](./SECURITY.md) | 安全配置和防护 ⭐ |
-| [COPY_FEATURE.md](./COPY_FEATURE.md) | 复制功能说明 |
-| [CHANGELOG.md](./CHANGELOG.md) | 版本更新日志 |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | 贡献指南 |
+| 文档                                           | 说明                |
+| ---------------------------------------------- | ------------------- |
+| [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) | 完整 API 接口文档   |
+| [DEPLOYMENT.md](./DEPLOYMENT.md)               | 生产环境部署指南 ⭐ |
+| [SECURITY.md](./SECURITY.md)                   | 安全配置和防护 ⭐   |
+| [COPY_FEATURE.md](./COPY_FEATURE.md)           | 复制功能说明        |
+| [CHANGELOG.md](./CHANGELOG.md)                 | 版本更新日志        |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)           | 贡献指南            |
 
 ## 🎯 使用场景
 
@@ -424,6 +424,20 @@ Go 应用 (监听 8080)
 - 期望行为
 - 实际行为
 - 错误日志（如有）
+
+### 常见问题
+
+**Q: Nginx 报错 `unknown directive "more_clear_headers"`？**
+
+A: 运行 `sudo ./fix-nginx-config.sh` 修复，或参考 [DEPLOYMENT.md 故障排查](./DEPLOYMENT.md#问题-4-nginx-配置错误---unknown-directive-more_clear_headers)
+
+**Q: Docker 容器一直重启？**
+
+A: 运行 `./debug-docker.sh` 诊断，或查看 [DEPLOYMENT.md](./DEPLOYMENT.md#-故障排查)
+
+**Q: 8080 端口对外暴露了？**
+
+A: 运行 `sudo ./block-8080.sh` 配置防火墙，详见 [SECURITY.md](./SECURITY.md#-防火墙配置)
 
 ### 功能请求
 
