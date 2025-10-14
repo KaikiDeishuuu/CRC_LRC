@@ -19,20 +19,41 @@ fi
 echo -e "\n[1] 当前 8080 端口相关规则:"
 iptables -L INPUT -n -v | grep 8080 || echo "没有现有规则"
 
-echo -e "\n[2] 添加防火墙规则..."
+echo -e "\n[2] 检查是否已有规则..."
 
-# 允许本地回环访问 8080
-iptables -I INPUT -i lo -p tcp --dport 8080 -j ACCEPT
+# 检查是否已经配置过
+if iptables -L INPUT -n | grep -q "dpt:8080"; then
+    echo "⚠️  发现已有 8080 端口规则"
+    read -p "是否清理旧规则并重新配置? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "清理旧规则..."
+        # 删除所有 8080 规则
+        while iptables -L INPUT -n | grep -q "dpt:8080"; do
+            iptables -D INPUT -p tcp --dport 8080 -j DROP 2>/dev/null || true
+            iptables -D INPUT -i lo -p tcp --dport 8080 -j ACCEPT 2>/dev/null || true
+        done
+        echo "✓ 旧规则已清理"
+    else
+        echo "取消配置"
+        exit 0
+    fi
+fi
 
-# 拒绝所有其他来源访问 8080
-iptables -I INPUT -p tcp --dport 8080 -j DROP
+echo -e "\n[3] 添加防火墙规则..."
+
+# 允许本地回环访问 8080（插入到第1行）
+iptables -I INPUT 1 -i lo -p tcp --dport 8080 -j ACCEPT
+
+# 拒绝所有其他来源访问 8080（插入到第2行）
+iptables -I INPUT 2 -p tcp --dport 8080 -j DROP
 
 echo "✓ 规则已添加"
 
-echo -e "\n[3] 新的 8080 端口规则:"
-iptables -L INPUT -n -v | grep 8080
+echo -e "\n[4] 新的 8080 端口规则:"
+iptables -L INPUT -n -v --line-numbers | grep 8080
 
-echo -e "\n[4] 保存规则（重启后依然生效）..."
+echo -e "\n[5] 保存规则（重启后依然生效）..."
 
 # 检测系统类型并保存规则
 if command -v netfilter-persistent &> /dev/null; then
@@ -48,7 +69,7 @@ else
     echo "请手动运行: iptables-save > /etc/iptables/rules.v4"
 fi
 
-echo -e "\n[5] 测试配置..."
+echo -e "\n[6] 测试配置..."
 echo "✓ 本地访问测试:"
 curl -s http://localhost:8080/ > /dev/null && echo "  - localhost:8080 可访问" || echo "  - localhost:8080 无法访问"
 
