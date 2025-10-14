@@ -30,10 +30,12 @@ COPY go.mod go.sum ./
 # 下载依赖
 RUN go mod download
 
-# 复制源码
-COPY . .
+# 复制 Go 源码（只复制必要的文件）
+COPY *.go ./
+COPY config/ ./config/
+COPY internal/ ./internal/
 
-# 从前端构建阶段复制编译后的文件
+# 从前端构建阶段复制编译后的文件到 web 目录
 COPY --from=frontend-builder /app/frontend/dist ./web
 
 # 构建 Go 应用（静态编译）
@@ -55,3 +57,15 @@ COPY --from=backend-builder /app/checksum-api .
 
 # 从前端构建阶段复制静态文件
 COPY --from=frontend-builder /app/frontend/dist ./web
+
+# 复制配置文件
+COPY --from=backend-builder /app/config ./config
+
+# 赋予执行权限
+RUN chmod +x ./checksum-api
+
+# 暴露端口
+EXPOSE 8080
+
+# 运行应用
+CMD ["./checksum-api"]
