@@ -53,14 +53,14 @@ sudo ./monitor-api.sh
 
 ### 管理工具
 
-| 脚本 | 用途 |
-|------|------|
+| 脚本                      | 用途                             |
+| ------------------------- | -------------------------------- |
 | `setup-api-protection.sh` | 配置速率限制、Fail2ban 等防护 ⭐ |
-| `monitor-api.sh` | 监控 API 访问和异常行为 ⭐ |
-| `block-ip.sh` | 快速封禁恶意 IP ⭐ |
-| `unblock-ip.sh` | 解封 IP 地址 ⭐ |
-| `block-8080.sh` | 配置端口防火墙 |
-| `cleanup-8080-rules.sh` | 清理防火墙规则 |
+| `monitor-api.sh`          | 监控 API 访问和异常行为 ⭐       |
+| `block-ip.sh`             | 快速封禁恶意 IP ⭐               |
+| `unblock-ip.sh`           | 解封 IP 地址 ⭐                  |
+| `block-8080.sh`           | 配置端口防火墙                   |
+| `cleanup-8080-rules.sh`   | 清理防火墙规则                   |
 
 ---
 
@@ -192,6 +192,7 @@ sudo ./setup-api-protection.sh
 ```
 
 脚本会自动配置：
+
 - ✅ 速率限制（防止 API 滥用）
 - ✅ 连接数限制（防止 DDoS）
 - ✅ 请求体大小限制（防止大文件攻击）
@@ -203,23 +204,23 @@ sudo ./setup-api-protection.sh
 
 如果需要手动配置，在 Nginx 配置中添加：
 
-```nginx
+````nginx
 http {
     # 定义限流区域
     limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
     limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
-    
+
     server {
         location /api/ {
             # 应用速率限制（每秒 10 个请求，突发 20 个）
             limit_req zone=api_limit burst=20 nodelay;
-            
+
             # 限制单 IP 并发连接数
             limit_conn conn_limit 10;
-            
+
             # 引入防护配置
             include snippets/api-protection.conf;
-            
+
             proxy_pass http://localhost:8080/api/;
             # ... 其他配置
         }
@@ -235,7 +236,7 @@ http {
     # 自定义 Server 头
     more_set_headers "Server: WebServer";
 }
-```
+````
 
 ### 添加安全头
 
@@ -379,6 +380,7 @@ sudo ./monitor-api.sh
 ```
 
 脚本会显示：
+
 - ✅ 访问统计（IP、状态码、路径）
 - ✅ 错误日志分析
 - ✅ Fail2ban 状态

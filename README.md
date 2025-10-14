@@ -116,9 +116,14 @@ curl -X POST http://localhost:8080/api/checksum \
 
 ## 📖 文档
 
-- **完整 API 文档**: [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
-- **Docker 部署文档**: [DEPLOYMENT.md](./DEPLOYMENT.md) ⭐ 新增
-- **复制功能说明**: [COPY_FEATURE.md](./COPY_FEATURE.md)
+| 文档 | 说明 |
+|------|------|
+| [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) | 完整 API 接口文档 |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | 生产环境部署指南 ⭐ |
+| [SECURITY.md](./SECURITY.md) | 安全配置和防护 ⭐ |
+| [COPY_FEATURE.md](./COPY_FEATURE.md) | 复制功能说明 |
+| [CHANGELOG.md](./CHANGELOG.md) | 版本更新日志 |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | 贡献指南 |
 
 ## 🎯 使用场景
 
