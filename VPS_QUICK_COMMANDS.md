@@ -11,11 +11,13 @@ git pull origin DEV
 ## 🔧 快速配置 Telegram
 
 ### 方式 1: 自动配置（推荐）
+
 ```bash
 ./scripts/install-or-update.sh
 ```
 
 ### 方式 2: 手动配置
+
 ```bash
 nano config/config.yaml
 # 修改:
