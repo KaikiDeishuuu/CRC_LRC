@@ -165,6 +165,8 @@ func sendJSONError(w http.ResponseWriter, code int, message string) {
 
 // sendMultiChecksumNotification 发送多算法校验和计算的通知
 func sendMultiChecksumNotification(r *http.Request, input string, result APIResponse) {
+	logrus.Debug("🔔 sendMultiChecksumNotification called")
+	
 	// 获取客户端 IP
 	ip := getClientIP(r)
 
@@ -192,6 +194,12 @@ func sendMultiChecksumNotification(r *http.Request, input string, result APIResp
 		resultParts = append(resultParts, fmt.Sprintf("LRC: %s", result.LRC))
 	}
 	resultStr := strings.Join(resultParts, ", ")
+
+	logrus.WithFields(logrus.Fields{
+		"ip":     ip,
+		"input":  input,
+		"result": resultStr,
+	}).Info("📤 Preparing to send Telegram notification")
 
 	// 发送通知
 	notification.SendTelegramNotification(notification.NotificationData{
