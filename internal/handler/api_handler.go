@@ -2,10 +2,12 @@ package handler
 
 import (
 	"CRC_LRC/internal/calculator"
+	"CRC_LRC/internal/notification"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -77,6 +79,9 @@ func ChecksumMultiHandler(w http.ResponseWriter, r *http.Request) {
 		"crc32":  response.CRC32,
 		"sum8":   response.SUM8,
 	}).Info("Checksum calculation successful")
+
+	// 🔥 发送 Telegram 通知
+	go sendMultiChecksumNotification(r, req.Data, response)
 }
 
 // CRCHandler 处理CRC计算请求（兼容旧版本）
@@ -156,4 +161,45 @@ func sendJSONError(w http.ResponseWriter, code int, message string) {
 		"code":    code,
 		"message": message,
 	}).Error("API Error")
+}
+
+// sendMultiChecksumNotification 发送多算法校验和计算的通知
+func sendMultiChecksumNotification(r *http.Request, input string, result APIResponse) {
+	// 获取客户端 IP
+	ip := getClientIP(r)
+
+	// 获取 User-Agent
+	userAgent := r.Header.Get("User-Agent")
+	if userAgent == "" {
+		userAgent = "Unknown"
+	}
+
+	// 格式化结果信息
+	var resultParts []string
+	if result.CRC != "" {
+		resultParts = append(resultParts, fmt.Sprintf("CRC16-MODBUS: %s", result.CRC))
+	}
+	if result.CRC16_CCITT != "" {
+		resultParts = append(resultParts, fmt.Sprintf("CRC16-CCITT: %s", result.CRC16_CCITT))
+	}
+	if result.CRC32 != "" {
+		resultParts = append(resultParts, fmt.Sprintf("CRC32-IEEE: %s", result.CRC32))
+	}
+	if result.SUM8 != "" {
+		resultParts = append(resultParts, fmt.Sprintf("SUM8: %s", result.SUM8))
+	}
+	if result.LRC != "" {
+		resultParts = append(resultParts, fmt.Sprintf("LRC: %s", result.LRC))
+	}
+	resultStr := strings.Join(resultParts, ", ")
+
+	// 发送通知
+	notification.SendTelegramNotification(notification.NotificationData{
+		ToolName:  "CRC/LRC Calculator",
+		InputData: input,
+		Method:    "API Multi-Algorithm",
+		Result:    resultStr,
+		IP:        ip,
+		UserAgent: userAgent,
+	})
 }
