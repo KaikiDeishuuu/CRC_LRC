@@ -163,33 +163,6 @@ func sendJSONError(w http.ResponseWriter, code int, message string) {
 	}).Error("API Error")
 }
 
-// getClientIP 获取客户端真实 IP（从 checksum_handler.go 复用）
-func getClientIP(r *http.Request) string {
-	// 优先从 X-Real-IP 获取
-	ip := r.Header.Get("X-Real-IP")
-	if ip != "" {
-		return ip
-	}
-
-	// 其次从 X-Forwarded-For 获取
-	ip = r.Header.Get("X-Forwarded-For")
-	if ip != "" {
-		// X-Forwarded-For 可能包含多个 IP，取第一个
-		if idx := strings.Index(ip, ","); idx > 0 {
-			ip = ip[:idx]
-		}
-		return strings.TrimSpace(ip)
-	}
-
-	// 最后使用 RemoteAddr
-	ip = r.RemoteAddr
-	// 去除端口号
-	if idx := strings.LastIndex(ip, ":"); idx > 0 {
-		ip = ip[:idx]
-	}
-	return ip
-}
-
 // sendMultiChecksumNotification 发送多算法校验和计算的通知
 func sendMultiChecksumNotification(r *http.Request, input string, result APIResponse) {
 	// 获取客户端 IP
