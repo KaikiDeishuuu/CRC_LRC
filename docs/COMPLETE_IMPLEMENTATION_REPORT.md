@@ -127,7 +127,7 @@ go func() {
 ./check-sensitive-info.sh  ✓ 通过
 
 # 手动验证
-grep -r "8157774237\|7943067576" .  ✓ 未找到
+grep -r "YOUR_TOKEN_PATTERN" .  ✓ 未找到
 
 # Git 状态
 .env 在 .gitignore 中  ✓ 受保护

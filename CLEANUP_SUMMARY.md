@@ -35,8 +35,8 @@
 ```yaml
 # ❌ 这些信息已经提交到 Git（不安全！）
 telegram:
-  botToken: "8157774237:AAGMrGHHhemaoJYtb6rBUkjz8Nyvt7QwAZM"
-  chatId: "7943067576"
+  botToken: "YOUR_BOT_TOKEN_WAS_HERE"
+  chatId: "YOUR_CHAT_ID_WAS_HERE"
 ```
 
 #### 现在的解决方案
