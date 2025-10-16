@@ -12,6 +12,26 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+# 首先拉取最新代码
+echo -e "${BLUE}📋 步骤 0: 拉取最新代码${NC}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+if [ -d ".git" ]; then
+    echo "检测到 Git 仓库，正在拉取最新代码..."
+    CURRENT_BRANCH=$(git branch --show-current)
+    echo "当前分支: $CURRENT_BRANCH"
+    
+    git fetch origin
+    git pull origin "$CURRENT_BRANCH" || {
+        echo -e "${YELLOW}⚠️  Git pull 失败，可能有本地修改${NC}"
+        echo "继续使用当前代码..."
+    }
+    echo -e "${GREEN}✓ 代码已更新${NC}"
+else
+    echo -e "${YELLOW}⚠️  不是 Git 仓库，跳过 git pull${NC}"
+fi
+
+echo ""
+
 # 检测 docker compose 命令
 if command -v docker-compose &> /dev/null; then
     DOCKER_COMPOSE="docker-compose"
