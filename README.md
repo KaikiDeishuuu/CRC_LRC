@@ -27,10 +27,35 @@
 - 📋 **智能复制**: 自动复制完整数据（输入 + 校验值），无需手动拼接
 - 🔧 **双输入模式**: 支持文本和 HEX 两种输入方式
 - 🌐 **内置 Web 界面**: 美观的前端界面，开箱即用
-- 🔌 **API 友好**: RESTful 设计，易于集成到任何项目
+- 🔌 **API 友好**: RESTful 设计,易于集成到任何项目
 - ⚡ **高性能**: 无状态设计，支持高并发，响应时间 < 10ms
+- 📱 **Telegram 通知**: 自动发送使用通知，实时监控 API 使用情况（可选）
 
 ## 🚀 快速开始
+
+### 🎯 傻瓜式一键安装（推荐）
+
+**无需任何配置，自动完成所有设置！**
+
+```bash
+# 克隆项目
+git clone https://github.com/KaikiDeishuuu/CRC_LRC.git
+cd CRC_LRC
+
+# 运行一键安装脚本（支持交互式配置 Telegram）
+./scripts/install-or-update.sh
+```
+
+脚本会自动：
+
+- ✅ 检测环境（Docker、Docker Compose）
+- ✅ 交互式配置 Telegram 通知（可选）
+- ✅ 构建并启动 Docker 容器
+- ✅ 健康检查和测试
+
+📖 **详细说明**: [傻瓜式安装指南](./QUICKSTART.md) | [完整文档](./docs/EASY_INSTALL.md)
+
+---
 
 ### 方式一：直接运行（开发环境）
 
@@ -39,11 +64,11 @@ cd /home/GoProjects/WebAPI/CRC_LRC
 go run .
 ```
 
-### 方式二：Docker 部署（生产环境推荐）
+### 方式二：Docker 部署（手动配置）
 
 ```bash
 # 一键部署
-./deploy.sh deploy
+./scripts/deploy.sh deploy
 
 # 或手动部署
 docker-compose up -d --build
@@ -116,14 +141,17 @@ curl -X POST http://localhost:8080/api/checksum \
 
 ## 📖 文档
 
-| 文档                                           | 说明                |
-| ---------------------------------------------- | ------------------- |
-| [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) | 完整 API 接口文档   |
-| [DEPLOYMENT.md](./DEPLOYMENT.md)               | 生产环境部署指南 ⭐ |
-| [SECURITY.md](./SECURITY.md)                   | 安全配置和防护 ⭐   |
-| [COPY_FEATURE.md](./COPY_FEATURE.md)           | 复制功能说明        |
-| [CHANGELOG.md](./CHANGELOG.md)                 | 版本更新日志        |
-| [CONTRIBUTING.md](./CONTRIBUTING.md)           | 贡献指南            |
+| 文档                                                                  | 说明                     |
+| --------------------------------------------------------------------- | ------------------------ |
+| [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)                        | 完整 API 接口文档        |
+| [DEPLOYMENT.md](./DEPLOYMENT.md)                                      | 生产环境部署指南 ⭐      |
+| [VPS_DOCKER_UPDATE.md](./docs/VPS_DOCKER_UPDATE.md)                   | VPS Docker 更新指南 🆕   |
+| [SECURITY.md](./docs/SECURITY.md)                                     | 安全配置和防护 ⭐        |
+| [TELEGRAM_README.md](./docs/TELEGRAM_README.md)                       | Telegram 通知快速开始 🆕 |
+| [TELEGRAM_INTEGRATION_GUIDE.md](./docs/TELEGRAM_INTEGRATION_GUIDE.md) | Telegram 完整集成指南    |
+| [COPY_FEATURE.md](./COPY_FEATURE.md)                                  | 复制功能说明             |
+| [CHANGELOG.md](./CHANGELOG.md)                                        | 版本更新日志             |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)                                  | 贡献指南                 |
 
 ## 🎯 使用场景
 
@@ -219,6 +247,8 @@ WebAPI/CRC_LRC/
 │   │   ├── checksum_handler.go
 │   │   ├── file_handler.go
 │   │   └── home_handler.go
+│   ├── notification/         # 通知模块 🆕
+│   │   └── telegram.go      # Telegram 通知
 │   └── router/               # 路由配置
 │       └── router.go
 ├── frontend/                 # 前端源码
@@ -352,7 +382,18 @@ Go 应用 (监听 8080)
 
 ---
 
-## �📝 更新日志
+## 📝 更新日志
+
+### v1.3.0 (2025-10-17) 🆕
+
+- 📱 **新增**: Telegram 通知集成
+  - 异步发送，不阻塞 API 响应
+  - 详细的使用信息记录（IP、时间、结果等）
+  - 支持环境变量配置
+  - 完整的文档和测试脚本
+- 📖 **新增**: TELEGRAM_INTEGRATION_GUIDE.md 完整指南
+- 🧪 **新增**: test-telegram.sh 自动化测试脚本
+- ⚙️ **新增**: .env.example 环境变量模板
 
 ### v1.2.0 (2025-10-14)
 

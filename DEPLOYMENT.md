@@ -10,13 +10,13 @@ git clone https://github.com/KaikiDeishuuu/CRC_LRC.git
 cd CRC_LRC
 
 # 2. 运行一键部署脚本
-./deploy.sh deploy
+./scripts/deploy.sh deploy
 
 # 3. 配置防火墙（关闭 8080 对外访问）
 sudo ./block-8080.sh
 
 # 4. 配置 Nginx 反向代理（可选，如果未手动配置）
-sudo ./install-nginx-config.sh
+sudo ./scripts/install-nginx-config.sh
 ```
 
 ### 前提条件
@@ -35,22 +35,22 @@ sudo ./install-nginx-config.sh
 
 | 脚本                      | 用途             | 使用方法                         |
 | ------------------------- | ---------------- | -------------------------------- |
-| `deploy.sh`               | 完整部署流程     | `./deploy.sh deploy`             |
-| `restart.sh`              | 快速重启服务     | `./restart.sh`                   |
-| `clean-docker.sh`         | 清理 Docker 空间 | `./clean-docker.sh`              |
-| `debug-docker.sh`         | 调试容器问题     | `./debug-docker.sh`              |
+| `scripts/deploy.sh`               | 完整部署流程     | `./scripts/deploy.sh deploy`             |
+| `scripts/restart.sh`              | 快速重启服务     | `./scripts/restart.sh`                   |
+| `scripts/clean-docker.sh`         | 清理 Docker 空间 | `./scripts/clean-docker.sh`              |
+| `scripts/debug-docker.sh`         | 调试容器问题     | `./scripts/debug-docker.sh`              |
 | `block-8080.sh`           | 配置防火墙规则   | `sudo ./block-8080.sh`           |
 | `cleanup-8080-rules.sh`   | 清理防火墙规则   | `sudo ./cleanup-8080-rules.sh`   |
-| `install-nginx-config.sh` | 自动配置 Nginx   | `sudo ./install-nginx-config.sh` |
+| `scripts/install-nginx-config.sh` | 自动配置 Nginx   | `sudo ./scripts/install-nginx-config.sh` |
 
 ### deploy.sh 命令
 
 ```bash
-./deploy.sh deploy    # 完整部署（构建前端 + Docker）
-./deploy.sh stop      # 停止服务
-./deploy.sh restart   # 重启服务
-./deploy.sh logs      # 查看日志
-./deploy.sh status    # 查看状态
+./scripts/deploy.sh deploy    # 完整部署（构建前端 + Docker）
+./scripts/deploy.sh stop      # 停止服务
+./scripts/deploy.sh restart   # 重启服务
+./scripts/deploy.sh logs      # 查看日志
+./scripts/deploy.sh status    # 查看状态
 ```
 
 ---
@@ -439,7 +439,7 @@ docker-compose logs --tail=100 checksum-api
 
 ```bash
 # 运行完整诊断
-./debug-docker.sh
+./scripts/debug-docker.sh
 ```
 
 这个脚本会自动检查：
@@ -463,7 +463,7 @@ sudo ss -tlnp | grep 8080
 docker-compose build --no-cache
 
 # 使用调试脚本
-./debug-docker.sh
+./scripts/debug-docker.sh
 ```
 
 ### 问题 2: Nginx 502 Bad Gateway
@@ -504,7 +504,7 @@ ls -la /etc/letsencrypt/live/your-domain.com/
 
 ```bash
 # 方法 1: 使用自动修复脚本（推荐）
-sudo ./fix-nginx-config.sh
+sudo ./scripts/fix-nginx-config.sh
 
 # 方法 2: 一键命令修复
 sudo sed -i 's/^more_clear_headers/#more_clear_headers/g' /etc/nginx/snippets/api-protection.conf
@@ -517,6 +517,7 @@ sudo apt install nginx-extras  # Ubuntu/Debian
 ```
 
 修复后的配置使用标准 Nginx 指令：
+
 - `server_tokens off` - 隐藏版本号
 - `proxy_hide_header X-Powered-By` - 隐藏后端信息
 

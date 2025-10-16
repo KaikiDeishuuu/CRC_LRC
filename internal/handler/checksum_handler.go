@@ -3,6 +3,7 @@ package handler
 import (
 	"CRC_LRC/config"
 	"CRC_LRC/internal/calculator"
+	"CRC_LRC/internal/notification"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -115,6 +116,9 @@ func ChecksumHandler(w http.ResponseWriter, r *http.Request) {
 		Results:       results,
 	}
 
+	// 🔥 异步发送 Telegram 通知
+	go sendChecksumNotification(r, inputStr, response)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 	logrus.WithFields(logrus.Fields{
@@ -122,4 +126,76 @@ func ChecksumHandler(w http.ResponseWriter, r *http.Request) {
 		"input_bytes_hex": response.InputBytesHex,
 		"results":         response.Results,
 	}).Info("Checksum calculation successful")
+}
+
+// sendChecksumNotification 发送校验和计算的通知
+func sendChecksumNotification(r *http.Request, input string, result Result) {
+	// 获取客户端 IP
+	ip := getClientIP(r)
+
+	// 获取 User-Agent
+	userAgent := r.Header.Get("User-Agent")
+	if userAgent == "" {
+		userAgent = "Unknown"
+	}
+
+	// 格式化结果信息
+	resultStr := formatResults(result.Results)
+
+	// 发送通知
+	notification.SendTelegramNotification(notification.NotificationData{
+		ToolName:  "CRC/LRC Calculator",
+		InputData: input,
+		Method:    "API Query",
+		Result:    resultStr,
+		IP:        ip,
+		UserAgent: userAgent,
+	})
+}
+
+// getClientIP 获取客户端真实 IP
+func getClientIP(r *http.Request) string {
+	// 优先从 X-Real-IP 获取
+	ip := r.Header.Get("X-Real-IP")
+	if ip != "" {
+		return ip
+	}
+
+	// 其次从 X-Forwarded-For 获取
+	ip = r.Header.Get("X-Forwarded-For")
+	if ip != "" {
+		// X-Forwarded-For 可能包含多个 IP，取第一个
+		if idx := strings.Index(ip, ","); idx > 0 {
+			ip = ip[:idx]
+		}
+		return strings.TrimSpace(ip)
+	}
+
+	// 最后使用 RemoteAddr
+	ip = r.RemoteAddr
+	// 去除端口号
+	if idx := strings.LastIndex(ip, ":"); idx > 0 {
+		ip = ip[:idx]
+	}
+	return ip
+}
+
+// formatResults 格式化多个校验和结果
+func formatResults(results map[calculator.CRCType]CRCResult) string {
+	var parts []string
+	
+	if crc, ok := results[calculator.CRC16_MODBUS]; ok {
+		parts = append(parts, fmt.Sprintf("CRC16-MODBUS: %s", crc.Hex))
+	}
+	if crc, ok := results[calculator.CRC16_CCITT]; ok {
+		parts = append(parts, fmt.Sprintf("CRC16-CCITT: %s", crc.Hex))
+	}
+	if crc, ok := results[calculator.CRC32_IEEE]; ok {
+		parts = append(parts, fmt.Sprintf("CRC32-IEEE: %s", crc.Hex))
+	}
+	if sum, ok := results[calculator.SUM8]; ok {
+		parts = append(parts, fmt.Sprintf("SUM8: %s", sum.Hex))
+	}
+	
+	return strings.Join(parts, ", ")
 }

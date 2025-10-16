@@ -34,6 +34,10 @@ coverage.html
 .env.local
 .env.*.local
 
+# ⚠️ 重要：如果 config.yaml 包含敏感信息（如 Telegram Token），请取消下行注释
+# config/config.yaml
+# 或者使用 git update-index --assume-unchanged config/config.yaml
+
 # 日志
 *.log
 /logs/

@@ -11,3 +11,9 @@ log:
 checksum:
   maxInputLengthBytes: 1048576 # 1MB
   maxFileUploadSizeMB: 10 # 10MB
+
+telegram:
+  enabled: false # 启用/禁用 Telegram 通知
+  botToken: "YOUR_BOT_TOKEN_HERE" # 从 @BotFather 获取
+  chatId: "YOUR_CHAT_ID_HERE" # 从 @userinfobot 获取
+  timeout: 5s # 通知请求超时时间

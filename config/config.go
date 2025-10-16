@@ -23,6 +23,12 @@ type AppConfig struct {
 		MaxInputLengthBytes int `mapstructure:"maxInputLengthBytes"`
 		MaxFileUploadSizeMB int `mapstructure:"maxFileUploadSizeMB"`
 	} `mapstructure:"checksum"`
+	Telegram struct {
+		Enabled  bool          `mapstructure:"enabled"`
+		BotToken string        `mapstructure:"botToken"`
+		ChatId   string        `mapstructure:"chatId"`
+		Timeout  time.Duration `mapstructure:"timeout"`
+	} `mapstructure:"telegram"`
 }
 
 var Cfg AppConfig
@@ -44,6 +50,11 @@ func LoadConfig() error {
 
 	viper.SetDefault("checksum.maxInputLengthBytes", 1048576) // 1MB
 	viper.SetDefault("checksum.maxFileUploadSizeMB", 11)      // 10MB + 1MB for header/metadata
+
+	viper.SetDefault("telegram.enabled", false)
+	viper.SetDefault("telegram.botToken", "")
+	viper.SetDefault("telegram.chatId", "")
+	viper.SetDefault("telegram.timeout", "5s")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
