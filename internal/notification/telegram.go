@@ -31,14 +31,9 @@ type NotificationData struct {
 
 // SendTelegramNotification 异步发送 Telegram 通知
 func SendTelegramNotification(data NotificationData) {
-	logrus.WithFields(logrus.Fields{
-		"enabled": config.Cfg.Telegram.Enabled,
-		"tool":    data.ToolName,
-	}).Info("🔔 SendTelegramNotification called")
-	
 	// 检查是否启用了 Telegram 通知
 	if !config.Cfg.Telegram.Enabled {
-		logrus.Warn("❌ Telegram notification is DISABLED in config")
+		logrus.Debug("Telegram notification is disabled")
 		return
 	}
 
