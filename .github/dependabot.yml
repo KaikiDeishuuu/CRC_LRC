@@ -1,0 +1,58 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # === 🧠 前端：Next.js (Yarn/NPM) ===
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "live"           # 实时检测前端依赖更新
+    versioning-strategy: increase
+    open-pull-requests-limit: 5
+    # 分组更新规则 —— 把相关依赖打包在一起，减少 PR 数量
+    groups:
+      react-stack:
+        patterns:
+          - "react*"
+          - "next*"
+      ui-frameworks:
+        patterns:
+          - "@mui/*"
+          - "antd"
+          - "tailwind*"
+      tooling:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "webpack*"
+          - "vite*"
+    # 忽略一些不会频繁更新或有破坏性更新的依赖
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+
+  # === ⚙️ 后端：Go Modules ===
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"         # 每周检查一次
+    open-pull-requests-limit: 5
+    # 分组策略 —— 将常见依赖更新放在一个 PR 里
+    groups:
+      core:
+        patterns:
+          - "github.com/gin*"
+          - "github.com/labstack/*"
+      database:
+        patterns:
+          - "gorm.io/*"
+          - "github.com/go-sql-driver/*"
+      utilities:
+        patterns:
+          - "github.com/*"
+
