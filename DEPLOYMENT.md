@@ -33,14 +33,14 @@ sudo ./scripts/install-nginx-config.sh
 
 项目提供了完整的管理脚本：
 
-| 脚本                      | 用途             | 使用方法                         |
-| ------------------------- | ---------------- | -------------------------------- |
+| 脚本                              | 用途             | 使用方法                                 |
+| --------------------------------- | ---------------- | ---------------------------------------- |
 | `scripts/deploy.sh`               | 完整部署流程     | `./scripts/deploy.sh deploy`             |
 | `scripts/restart.sh`              | 快速重启服务     | `./scripts/restart.sh`                   |
 | `scripts/clean-docker.sh`         | 清理 Docker 空间 | `./scripts/clean-docker.sh`              |
 | `scripts/debug-docker.sh`         | 调试容器问题     | `./scripts/debug-docker.sh`              |
-| `block-8080.sh`           | 配置防火墙规则   | `sudo ./block-8080.sh`           |
-| `cleanup-8080-rules.sh`   | 清理防火墙规则   | `sudo ./cleanup-8080-rules.sh`   |
+| `block-8080.sh`                   | 配置防火墙规则   | `sudo ./block-8080.sh`                   |
+| `cleanup-8080-rules.sh`           | 清理防火墙规则   | `sudo ./cleanup-8080-rules.sh`           |
 | `scripts/install-nginx-config.sh` | 自动配置 Nginx   | `sudo ./scripts/install-nginx-config.sh` |
 
 ### deploy.sh 命令
@@ -105,13 +105,13 @@ curl -X POST http://localhost:8080/api/checksum \
 
 ```bash
 # 复制配置文件到 Nginx 目录
-sudo cp nginx.conf /etc/nginx/sites-available/checksum-api
+sudo cp deploy/nginx/nginx.conf /etc/nginx/sites-available/checksum-api
 
 # 创建软链接
 sudo ln -s /etc/nginx/sites-available/checksum-api /etc/nginx/sites-enabled/
 
 # 或者直接复制到 conf.d（取决于你的 Nginx 配置）
-sudo cp nginx.conf /etc/nginx/conf.d/checksum-api.conf
+sudo cp deploy/nginx/nginx.conf /etc/nginx/conf.d/checksum-api.conf
 ```
 
 #### 3.2 修改配置文件

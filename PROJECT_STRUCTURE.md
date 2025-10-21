@@ -84,9 +84,9 @@ CRC_LRC/
 │   └── PROJECT_STRUCTURE.md     # 本文件
 │
 ├── 🔧 Nginx 配置
-│   ├── nginx.conf               # 主配置
-│   ├── nginx-docker.conf        # Docker 专用
-│   └── nginx-api-config.conf    # API 配置
+│   ├── deploy/nginx/nginx.conf               # 主配置（已归档到 deploy/nginx）
+│   ├── deploy/nginx/nginx-docker.conf        # Docker 专用（已归档）
+│   └── deploy/nginx/nginx-api-config.conf    # API 配置（已归档）
 │
 ├── 📋 其他配置
 │   ├── .env.example             # 环境变量模板
