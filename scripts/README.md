@@ -20,7 +20,7 @@
 - `setup-api-protection.sh` - API 保护设置
 - `pre-commit-hook.sh` - Git 预提交钩子
 - `debug-docker.sh` - Docker 调试工具
- - `install-or-update-fixed.sh` - 修复版一键安装/更新脚本（包含 arm64/buildx 支持）
+- `install-or-update-fixed.sh` - 修复版一键安装/更新脚本（包含 arm64/buildx 支持）
 
 ### 🧪 testing/
 
