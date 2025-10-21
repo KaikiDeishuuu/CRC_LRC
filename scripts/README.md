@@ -45,6 +45,17 @@
 - `unblock-ip.sh` - IP 解封工具
 - `cleanup-8080-rules.sh` - 清理 8080 规则
 
+## 🗄️ 已归档脚本
+
+- 所有已归档的脚本都移动到 `scripts/archive/`，按子目录（deployment/testing/maintenance）分类存放。
+- 如果需要恢复某个脚本：
+
+```bash
+# 将脚本从 archive 恢复到位于相应的目录中
+mv scripts/archive/deployment/quick-rebuild.sh scripts/deployment/quick-rebuild.sh
+chmod +x scripts/deployment/quick-rebuild.sh
+```
+
 ## 🎯 常用命令
 
 ### 快速部署

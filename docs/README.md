@@ -31,6 +31,10 @@
 
 详见 [`scripts/README.md`](../scripts/README.md)
 
+### 已归档文档
+
+- `docs/archive/` - 包含已归档（冗余或历史）文档，如多余的 Telegram 指南、实现报告与演示文档。
+
 ### 配置文件
 
 - `config/config.yaml` - 应用配置文件
