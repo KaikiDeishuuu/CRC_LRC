@@ -390,7 +390,7 @@ Go 应用 (监听 8080)
   - 详细的使用信息记录（IP、时间、结果等）
   - 支持环境变量配置
   - 完整的文档和测试脚本
--- 📖 **新增**: Telegram 完整集成指南（详见 `docs/TELEGRAM_INTEGRATION_GUIDE.md`）
+- 📖 **新增**: Telegram 完整集成指南（详见 `docs/TELEGRAM_INTEGRATION_GUIDE.md`）
 - 🧪 **新增**: test-telegram.sh 自动化测试脚本
 - ⚙️ **新增**: .env.example 环境变量模板
 
