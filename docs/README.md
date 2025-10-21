@@ -12,8 +12,8 @@
 - [`DEPLOYMENT.md`](../DEPLOYMENT.md) - 部署指南
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) - 贡献指南
 - [`LICENSE`](../LICENSE) - 开源许可证
-- [`PROJECT_STRUCTURE.md`](../PROJECT_STRUCTURE.md) - 项目结构说明
-- [`QUICKSTART.md`](../QUICKSTART.md) - 快速入门指南
+- [`PROJECT_STRUCTURE.md`](./archive/PROJECT_STRUCTURE.md) - 项目结构说明（已归档）
+- [`QUICKSTART.md`](./archive/QUICKSTART.md) - 快速入门指南（已归档）
 - [`COPY_FEATURE.md`](../COPY_FEATURE.md) - 复制功能说明
 
 ## 📁 指南文档（guides/）

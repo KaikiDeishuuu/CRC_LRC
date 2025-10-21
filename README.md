@@ -373,7 +373,7 @@ Go 应用 (监听 8080)
 
 - `Dockerfile` - 多阶段构建配置
 - `docker-compose.yml` - 容器编排配置
-- `nginx.conf` - Nginx 反向代理配置
+- `deploy/nginx/nginx.conf` - Nginx 反向代理配置
 - `deploy.sh` - 一键部署脚本
 - `DEPLOYMENT.md` - 详细部署文档
 
