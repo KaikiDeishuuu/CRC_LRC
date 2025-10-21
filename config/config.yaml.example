@@ -13,7 +13,7 @@ checksum:
   maxFileUploadSizeMB: 10 # 10MB
 
 telegram:
-  enabled: false # 启用/禁用 Telegram 通知
+  enabled: true # 启用/禁用 Telegram 通知（示例默认启用，实际部署请编辑并填入真实 Token/Chat ID）
   botToken: "YOUR_BOT_TOKEN_HERE" # 从 @BotFather 获取
   chatId: "YOUR_CHAT_ID_HERE" # 从 @userinfobot 获取（你的用户 ID）
   timeout: 5s # 通知请求超时时间

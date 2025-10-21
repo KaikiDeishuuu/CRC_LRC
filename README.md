@@ -86,7 +86,7 @@ git clone https://github.com/KaikiDeishuuu/CRC_LRC.git
 cd CRC_LRC
 
 # 2. 完整部署（构建前端 + Docker）
-./deploy.sh deploy
+./scripts/deployment/deploy.sh deploy
 
 # 3. 配置防火墙（关闭 8080 对外访问）
 sudo ./block-8080.sh
@@ -98,12 +98,11 @@ sudo ./install-nginx-config.sh
 **管理命令**：
 
 ```bash
-./deploy.sh deploy    # 完整部署
-./deploy.sh stop      # 停止服务
-./deploy.sh logs      # 查看日志
-./restart.sh          # 快速重启
-./clean-docker.sh     # 清理空间
-./debug-docker.sh     # 调试问题
+./scripts/deployment/deploy.sh deploy    # 完整部署
+ ./scripts/deployment/deploy.sh logs      # 查看日志
+ ./scripts/maintenance/restart.sh          # 快速重启
+ ./scripts/maintenance/clean-docker.sh     # 清理空间
+ ./scripts/deployment/debug-docker.sh     # 调试问题
 ```
 
 访问：`https://your-domain.com`
@@ -391,7 +390,7 @@ Go 应用 (监听 8080)
   - 详细的使用信息记录（IP、时间、结果等）
   - 支持环境变量配置
   - 完整的文档和测试脚本
-- 📖 **新增**: TELEGRAM_INTEGRATION_GUIDE.md 完整指南
+- 📖 **新增**: Telegram 完整集成指南（详见 `docs/TELEGRAM_INTEGRATION_GUIDE.md`）
 - 🧪 **新增**: test-telegram.sh 自动化测试脚本
 - ⚙️ **新增**: .env.example 环境变量模板
 
