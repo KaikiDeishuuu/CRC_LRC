@@ -1,14 +1,17 @@
 // api/checksum.go
-// Vercel Serverless Function for CRC/LRC calculation
+// Vercel Serverless Function for CRC/LRC calculation with Telegram notification
 package handler
 
 import (
+"bytes"
 "encoding/hex"
 "encoding/json"
 "fmt"
 "hash/crc32"
 "net/http"
+"os"
 "strings"
+"time"
 )
 
 // APIRequest 定义前端发送的请求格式
@@ -25,6 +28,13 @@ CRC32       string `json:"crc32,omitempty"`
 SUM8        string `json:"sum8,omitempty"`
 LRC         string `json:"lrc,omitempty"`
 Error       string `json:"error,omitempty"`
+}
+
+// TelegramPayload Telegram API 请求体
+type TelegramPayload struct {
+ChatID    string `json:"chat_id"`
+Text      string `json:"text"`
+ParseMode string `json:"parse_mode"`
 }
 
 // Handler - Vercel Serverless Function 入口
@@ -79,22 +89,102 @@ response.SUM8 = fmt.Sprintf("%02X", sum8)
 lrc := calculateLRC(inputBytes)
 response.LRC = fmt.Sprintf("%02X", lrc)
 
+// 获取客户端信息
+clientIP := r.Header.Get("X-Forwarded-For")
+if clientIP == "" {
+clientIP = r.Header.Get("X-Real-IP")
+}
+if clientIP == "" {
+clientIP = r.RemoteAddr
+}
+userAgent := r.Header.Get("User-Agent")
+
+// 发送 Telegram 通知（同步发送，确保在 serverless 函数返回前完成）
+sendTelegramNotification(req.Data, req.Method, response, clientIP, userAgent)
+
 w.Header().Set("Content-Type", "application/json")
 json.NewEncoder(w).Encode(response)
+}
+
+// sendTelegramNotification 发送 Telegram 通知
+func sendTelegramNotification(inputData, method string, result APIResponse, ip, userAgent string) {
+botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+chatID := os.Getenv("TELEGRAM_CHAT_ID")
+
+if botToken == "" || chatID == "" {
+return // 未配置，静默跳过
+}
+
+// 限制输入数据长度
+if len(inputData) > 100 {
+inputData = inputData[:100] + "..."
+}
+if len(userAgent) > 80 {
+userAgent = userAgent[:80] + "..."
+}
+
+// 构建结果字符串
+resultStr := fmt.Sprintf("CRC16: %s | CCITT: %s | CRC32: %s | SUM8: %s | LRC: %s",
+result.CRC, result.CRC16_CCITT, result.CRC32, result.SUM8, result.LRC)
+
+// 获取北京时间
+loc, _ := time.LoadLocation("Asia/Shanghai")
+timeStr := time.Now().In(loc).Format("2006-01-02 15:04:05")
+
+// 构建消息
+message := fmt.Sprintf(
+"🔧 <b>CRC/LRC 计算器使用通知</b>\n\n"+
+"📊 <b>输入数据:</b> <code>%s</code>\n"+
+"🔢 <b>方法:</b> %s\n"+
+"✅ <b>结果:</b> <code>%s</code>\n\n"+
+"📍 <b>来源信息:</b>\n"+
+"• IP: %s\n"+
+"• User-Agent: %s\n"+
+"• 时间: %s",
+escapeHTML(inputData),
+escapeHTML(method),
+escapeHTML(resultStr),
+escapeHTML(ip),
+escapeHTML(userAgent),
+timeStr,
+)
+
+payload := TelegramPayload{
+ChatID:    chatID,
+Text:      message,
+ParseMode: "HTML",
+}
+
+jsonData, err := json.Marshal(payload)
+if err != nil {
+return
+}
+
+url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", botToken)
+client := &http.Client{Timeout: 5 * time.Second}
+resp, err := client.Post(url, "application/json", bytes.NewBuffer(jsonData))
+if err != nil {
+return
+}
+defer resp.Body.Close()
+}
+
+// escapeHTML 转义 HTML 特殊字符
+func escapeHTML(s string) string {
+s = strings.ReplaceAll(s, "&", "&amp;")
+s = strings.ReplaceAll(s, "<", "&lt;")
+s = strings.ReplaceAll(s, ">", "&gt;")
+return s
 }
 
 // parseInputData 根据方法类型解析输入数据
 func parseInputData(data string, method string) ([]byte, error) {
 if method == "hex" {
-// 移除空格和常见分隔符
 cleanHex := strings.ReplaceAll(data, " ", "")
 cleanHex = strings.ReplaceAll(cleanHex, "-", "")
 cleanHex = strings.ReplaceAll(cleanHex, ":", "")
 cleanHex = strings.ToLower(cleanHex)
-
-// 移除 0x 前缀
 cleanHex = strings.TrimPrefix(cleanHex, "0x")
-
 return hex.DecodeString(cleanHex)
 }
 return []byte(data), nil
@@ -107,7 +197,7 @@ w.WriteHeader(code)
 json.NewEncoder(w).Encode(APIResponse{Error: message})
 }
 
-// calculateCRC16Modbus 计算CRC16-MODBUS校验码 (多项式 0xA001)
+// calculateCRC16Modbus 计算CRC16-MODBUS校验码
 func calculateCRC16Modbus(data []byte) uint16 {
 crc := uint16(0xFFFF)
 for _, b := range data {
@@ -123,7 +213,7 @@ crc >>= 1
 return crc
 }
 
-// calculateCRC16CCITT 计算CRC16-CCITT校验码 (多项式 0x1021)
+// calculateCRC16CCITT 计算CRC16-CCITT校验码
 func calculateCRC16CCITT(data []byte) uint16 {
 crc := uint16(0xFFFF)
 for _, b := range data {
