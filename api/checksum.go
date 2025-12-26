@@ -8,6 +8,7 @@ import (
 "encoding/json"
 "fmt"
 "hash/crc32"
+"log"
 "net/http"
 "os"
 "strings"
@@ -17,7 +18,7 @@ import (
 // APIRequest 定义前端发送的请求格式
 type APIRequest struct {
 Data   string `json:"data"`
-Method string `json:"method"` // "text" 或 "hex"
+Method string `json:"method"`
 }
 
 // APIResponse 定义返回给前端的响应格式
@@ -39,7 +40,8 @@ ParseMode string `json:"parse_mode"`
 
 // Handler - Vercel Serverless Function 入口
 func Handler(w http.ResponseWriter, r *http.Request) {
-// CORS 头
+log.Println("🔵 Handler called")
+
 w.Header().Set("Access-Control-Allow-Origin", "*")
 w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -60,7 +62,8 @@ sendJSONError(w, http.StatusBadRequest, "Invalid request body")
 return
 }
 
-// 解析输入数据
+log.Printf("�� Request: data=%s, method=%s", req.Data, req.Method)
+
 inputBytes, err := parseInputData(req.Data, req.Method)
 if err != nil {
 sendJSONError(w, http.StatusBadRequest, err.Error())
@@ -69,27 +72,21 @@ return
 
 response := APIResponse{}
 
-// 计算 CRC16 MODBUS
 crc16 := calculateCRC16Modbus(inputBytes)
 response.CRC = fmt.Sprintf("%02X%02X", byte(crc16&0xFF), byte(crc16>>8))
 
-// 计算 CRC16 CCITT
 crc16ccitt := calculateCRC16CCITT(inputBytes)
 response.CRC16_CCITT = fmt.Sprintf("%04X", crc16ccitt)
 
-// 计算 CRC32
 crc32val := crc32.ChecksumIEEE(inputBytes)
 response.CRC32 = fmt.Sprintf("%08X", crc32val)
 
-// 计算 SUM8
 sum8 := calculateSum8(inputBytes)
 response.SUM8 = fmt.Sprintf("%02X", sum8)
 
-// 计算 LRC
 lrc := calculateLRC(inputBytes)
 response.LRC = fmt.Sprintf("%02X", lrc)
 
-// 获取客户端信息
 clientIP := r.Header.Get("X-Forwarded-For")
 if clientIP == "" {
 clientIP = r.Header.Get("X-Real-IP")
@@ -99,23 +96,28 @@ clientIP = r.RemoteAddr
 }
 userAgent := r.Header.Get("User-Agent")
 
-// 发送 Telegram 通知（同步发送，确保在 serverless 函数返回前完成）
-sendTelegramNotification(req.Data, req.Method, response, clientIP, userAgent)
+log.Printf("🔵 Calling sendTelegramNotification")
+err = sendTelegramNotification(req.Data, req.Method, response, clientIP, userAgent)
+if err != nil {
+log.Printf("🔴 Telegram error: %v", err)
+} else {
+log.Printf("🟢 Telegram notification sent")
+}
 
 w.Header().Set("Content-Type", "application/json")
 json.NewEncoder(w).Encode(response)
 }
 
-// sendTelegramNotification 发送 Telegram 通知
-func sendTelegramNotification(inputData, method string, result APIResponse, ip, userAgent string) {
+func sendTelegramNotification(inputData, method string, result APIResponse, ip, userAgent string) error {
 botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 chatID := os.Getenv("TELEGRAM_CHAT_ID")
 
+log.Printf("🔵 Telegram config: token_len=%d, chatID=%s", len(botToken), chatID)
+
 if botToken == "" || chatID == "" {
-return // 未配置，静默跳过
+return fmt.Errorf("telegram not configured: token=%d, chatID=%s", len(botToken), chatID)
 }
 
-// 限制输入数据长度
 if len(inputData) > 100 {
 inputData = inputData[:100] + "..."
 }
@@ -123,15 +125,12 @@ if len(userAgent) > 80 {
 userAgent = userAgent[:80] + "..."
 }
 
-// 构建结果字符串
 resultStr := fmt.Sprintf("CRC16: %s | CCITT: %s | CRC32: %s | SUM8: %s | LRC: %s",
 result.CRC, result.CRC16_CCITT, result.CRC32, result.SUM8, result.LRC)
 
-// 获取北京时间
 loc, _ := time.LoadLocation("Asia/Shanghai")
 timeStr := time.Now().In(loc).Format("2006-01-02 15:04:05")
 
-// 构建消息
 message := fmt.Sprintf(
 "🔧 <b>CRC/LRC 计算器使用通知</b>\n\n"+
 "📊 <b>输入数据:</b> <code>%s</code>\n"+
@@ -157,19 +156,24 @@ ParseMode: "HTML",
 
 jsonData, err := json.Marshal(payload)
 if err != nil {
-return
+return fmt.Errorf("marshal error: %v", err)
 }
 
 url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", botToken)
-client := &http.Client{Timeout: 5 * time.Second}
+client := &http.Client{Timeout: 10 * time.Second}
 resp, err := client.Post(url, "application/json", bytes.NewBuffer(jsonData))
 if err != nil {
-return
+return fmt.Errorf("http error: %v", err)
 }
 defer resp.Body.Close()
+
+if resp.StatusCode != 200 {
+return fmt.Errorf("telegram api error: status=%d", resp.StatusCode)
 }
 
-// escapeHTML 转义 HTML 特殊字符
+return nil
+}
+
 func escapeHTML(s string) string {
 s = strings.ReplaceAll(s, "&", "&amp;")
 s = strings.ReplaceAll(s, "<", "&lt;")
@@ -177,7 +181,6 @@ s = strings.ReplaceAll(s, ">", "&gt;")
 return s
 }
 
-// parseInputData 根据方法类型解析输入数据
 func parseInputData(data string, method string) ([]byte, error) {
 if method == "hex" {
 cleanHex := strings.ReplaceAll(data, " ", "")
@@ -190,14 +193,12 @@ return hex.DecodeString(cleanHex)
 return []byte(data), nil
 }
 
-// sendJSONError 发送JSON格式的错误响应
 func sendJSONError(w http.ResponseWriter, code int, message string) {
 w.Header().Set("Content-Type", "application/json")
 w.WriteHeader(code)
 json.NewEncoder(w).Encode(APIResponse{Error: message})
 }
 
-// calculateCRC16Modbus 计算CRC16-MODBUS校验码
 func calculateCRC16Modbus(data []byte) uint16 {
 crc := uint16(0xFFFF)
 for _, b := range data {
@@ -213,7 +214,6 @@ crc >>= 1
 return crc
 }
 
-// calculateCRC16CCITT 计算CRC16-CCITT校验码
 func calculateCRC16CCITT(data []byte) uint16 {
 crc := uint16(0xFFFF)
 for _, b := range data {
@@ -229,7 +229,6 @@ crc <<= 1
 return crc
 }
 
-// calculateSum8 计算8位累加和校验码
 func calculateSum8(data []byte) uint8 {
 var sum uint8
 for _, b := range data {
@@ -238,7 +237,6 @@ sum += b
 return sum
 }
 
-// calculateLRC 计算纵向冗余校验
 func calculateLRC(data []byte) uint8 {
 var lrc uint8
 for _, b := range data {

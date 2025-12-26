@@ -82,3 +82,4 @@ coverage.txt
 *.swp
 *.old
 .vercel
+.env*.local
